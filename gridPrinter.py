@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import random
+import copy
 
 height = 3;
 width = 4;
@@ -8,12 +9,15 @@ def ourList(num):
 	L=[]
 	for i in range(num):
 		L.append(random.randrange(1, 9, 1));
+	return L;
 
 def printRow(num):
 	#Horizontal Edge lengths
 	num=num;
-	HELens=["-"]*(num-1);
+	#HELens=["-"]*(num-1);
+	HELens=ourList(num-1);
 	L1=["+"]*num;
+	#L1=ourList(num);
 	for j in range(num-1):
 		print('[{n}] -{e}- '.format(n=L1[j], e=HELens[j]), end="");
 	print('[{n}]'.format(n=L1[-1]));
@@ -21,7 +25,8 @@ def printRow(num):
 def printDown(num):
 	#Vertical Edge lengths
 	num=num;
-	VELens=["|"]*(num);
+	#VELens=["|"]*(num);
+	VELens=ourList(num);
 	print(" ", end="");
 	for i in range(num-1):
 		print('|', end=" "*7);
