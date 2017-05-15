@@ -65,7 +65,9 @@ class Grid(object):
 			self.printRow(x);
 			self.printDown(x);
 		self.printRow(self.height-1);
-	def MT(self, n,m):
+	def recGrid(self):
+		return self.MT(self.width-1, self.height-1);
+	def MT(self, n,m): #recursively finds heaviest path to given point
 		if(n<0 or n>=self.width or m<0 or m>=self.height):
 			print("error: given coordinates are outside of grid boundary");
 			return 0;
@@ -77,15 +79,13 @@ class Grid(object):
 			y = self.MT(n,m-1) + self.VEdges[m-1][n];
 		if(n!=0):
 			x = self.MT(n-1,m) + self.HEdges[m][n-1];
-		self.nodes[m][n] = max(x, y);
+		self.nodes[m][n] = max(x, y); #we honestly don't need to do this. But it's proof the algorithm is recursing
 		return max(x, y);
-	
-	#def moveRight(self): #this does not include error checking.
-		#self.cD = self.cD + self.HEdges[self.cD[0]][self.cD[1]];
-	
-	#def moveDown
+	#def dynGrid(self):
+		
+
 
 butt = Grid(4,4);
 #butt.printGrid();
-butt.MT(3,3);
+butt.recGrid();
 butt.printGrid();
