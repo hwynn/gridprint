@@ -65,13 +65,27 @@ class Grid(object):
 			self.printRow(x);
 			self.printDown(x);
 		self.printRow(self.height-1);
-	#def MT(n,m):
-		#x = ;
+	def MT(self, n,m):
+		if(n<0 or n>=self.width or m<0 or m>=self.height):
+			print("error: given coordinates are outside of grid boundary");
+			return 0;
+		if(n==0 and m==0):
+			return 0;
+		x=0;
+		y=0;
+		if(m!=0):
+			y = self.MT(n,m-1) + self.VEdges[m-1][n];
+		if(n!=0):
+			x = self.MT(n-1,m) + self.HEdges[m][n-1];
+		self.nodes[m][n] = max(x, y);
+		return max(x, y);
 	
 	#def moveRight(self): #this does not include error checking.
 		#self.cD = self.cD + self.HEdges[self.cD[0]][self.cD[1]];
 	
 	#def moveDown
 
-butt = Grid(7,8);
+butt = Grid(4,4);
+#butt.printGrid();
+butt.MT(3,3);
 butt.printGrid();
