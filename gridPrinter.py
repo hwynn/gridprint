@@ -18,11 +18,13 @@ class Grid(object):
 	def __init__(self, X=5, Y=5):
 		self.height = Y; #these should never change
 		self.width = X; #is there a way to make these const?
+		
 		#2d array of blanks
 		self.nodes=[];					#self.nodes[y,x]
 		for i in range(self.height): #2d array of size [Y][X]
 			#self.nodes.append(["+"]*self.width); #[["+", "+", "+", "+", "+"]] intended result
 			self.nodes.append([0]*self.width);
+		
 		#2d array of horizontal edges
 		self.HEdges = [];				#self.HEdges[y,x]
 		for i in range(self.height):
@@ -30,6 +32,7 @@ class Grid(object):
 			self.HEdges.append([]);
 			for j in range(self.width-1):
 				self.HEdges[i].append(random.randrange(0, 10, 1));
+		
 		#2d array of vertical edges
 		self.VEdges = [];				#self.VEdges[y,x]
 		for i in range(self.height-1):
@@ -37,7 +40,14 @@ class Grid(object):
 			self.VEdges.append([]);
 			for j in range(self.width):
 				self.VEdges[i].append(random.randrange(0, 10, 1));
-	
+		
+		#2d array of diagonal edges
+		self.DEdges = [];				#self.DEdges[y,x]
+		for i in range(self.height-1):
+			self.DEdges.append([]);
+				for j in range(self.width-1):
+				self.HEdges[i].append(random.randrange(0, 10, 1));
+
 	def printRow(self, i):
 		for j in range(self.width-1):
 			print('[{n}]{e}'.format(n=str(self.nodes[i][j]).center(3," "), e=str(self.HEdges[i][j]).center(5,"-")), end="");
