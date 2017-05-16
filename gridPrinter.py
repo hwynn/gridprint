@@ -11,24 +11,27 @@ def ourList(num):
 		L.append(random.randrange(0, 9, 10));
 	return L;
 
+#note: this grid has lots of 2d arrays. I have made notes to keep their alignments straight.
+#these will look like #self.thing(x,y). This just indicates the axis of that thing and nothing else.
+
 class Grid(object):
 	def __init__(self, X=5, Y=5):
 		self.height = Y; #these should never change
 		self.width = X; #is there a way to make these const?
 		#2d array of blanks
-		self.nodes=[];
+		self.nodes=[];					#self.nodes[y,x]
 		for i in range(self.height): #2d array of size [Y][X]
 			#self.nodes.append(["+"]*self.width); #[["+", "+", "+", "+", "+"]] intended result
 			self.nodes.append([0]*self.width);
 		#2d array of horizontal edges
-		self.HEdges = [];
+		self.HEdges = [];				#self.HEdges[y,x]
 		for i in range(self.height):
 			#add array of random int
 			self.HEdges.append([]);
 			for j in range(self.width-1):
 				self.HEdges[i].append(random.randrange(0, 10, 1));
 		#2d array of vertical edges
-		self.VEdges = [];
+		self.VEdges = [];				#self.VEdges[y,x]
 		for i in range(self.height-1):
 			#add array of random int
 			self.VEdges.append([]);
@@ -67,7 +70,8 @@ class Grid(object):
 		self.printRow(self.height-1);
 	def recGrid(self):
 		return self.MT(self.width-1, self.height-1);
-	def MT(self, n,m): #recursively finds heaviest path to given point
+	#recursively finds heaviest path to given point
+	def MT(self, n,m): 					#self.MT(x,y) 
 		if(n<0 or n>=self.width or m<0 or m>=self.height):
 			print("error: given coordinates are outside of grid boundary");
 			return 0;
@@ -81,11 +85,54 @@ class Grid(object):
 			x = self.MT(n-1,m) + self.HEdges[m][n-1];
 		self.nodes[m][n] = max(x, y); #we honestly don't need to do this. But it's proof the algorithm is recursing
 		return max(x, y);
-	#def dynGrid(self):
-		
+	#self.nodes[y,x]
+	#self.HEdges[y,x]
+	#self.VEdges[y,x]
+	def dynGridA(self):
+		S = [];
+		for i in range(self.width): #i is x, uses horizontal
+			S.append([]);				#S[x,y];
+			for j in range(self.height): #j is y, uses vertical
+				x = 0;
+				y = 0;
+				if(i==0 and j==0):
+					S[0].append(0);
+					continue
+				if(j!=0): #check the path that led down to current node
+					y= S[i][j-1] + self.VEdges[j-1][i];
+				if(i!=0): #check the path that led right to current node
+					x= S[i-1][j] + self.HEdges[j][i-1];
+				S[i].append(max(x, y)); #adding to the local storage for the function's uses
+				self.nodes[j][i] = (max(x, y)); #adding to the Grid object instance
+		print(S);
+		print(self.nodes);
+		return S[self.width-1][self.height-1];
+	
+	def dynGridB(self):
+		S = [];
+		for A in range(self.height): #A is y, uses vertical
+			S.append([]);				#S[y,x];
+			for B in range(self.width): #B is x, uses horizontal
+				x = 0;
+				y = 0;
+				if(A==0 and B==0):
+					S[0].append(0);
+					continue
+				if(A!=0): #check the path that led down to current node
+					y = S[A-1][B] + self.VEdges[A-1][B];
+				if(B!=0): #check the path that led right to current node
+					x = S[A][B-1] + self.HEdges[A][B-1];	
+				S[A].append(max(x, y)); #adding to the local storage for the function's uses
+				self.nodes[A][B] = (max(x, y)); #adding to the Grid object instance
+		print(S);
+		print(self.nodes);
+		return S[self.height-1][self.width-1];
 
 
-butt = Grid(4,4);
-#butt.printGrid();
-butt.recGrid();
+butt = Grid(4,3);
+butt.printGrid();
+#butt.recGrid();
+butt.dynGridA();
+butt.printGrid();
+butt.dynGridB();
 butt.printGrid();
