@@ -45,8 +45,8 @@ class Grid(object):
 		self.DEdges = [];				#self.DEdges[y,x]
 		for i in range(self.height-1):
 			self.DEdges.append([]);
-				for j in range(self.width-1):
-				self.HEdges[i].append(random.randrange(0, 10, 1));
+			for j in range(self.width-1):
+				self.DEdges[i].append(random.randrange(0, 10, 1));
 
 	def printRow(self, i):
 		for j in range(self.width-1):
@@ -56,17 +56,26 @@ class Grid(object):
 	def printDown(self, i):
 		print(" "*2, end="");
 		for j in range(self.width-1):
-			print('|', end=" "*9);
+			print('|', end="");
+			print(" "*2, end="");
+			print("\\", end="")
+			print(" "*6, end="");
 		print('|');
 		
 		print("  ", end="");
 		for j in range(self.width-1):
-			print('{e}{space}'.format(e=self.VEdges[i][j], space=" "*9), end="");
-		print('{e}'.format(e=self.VEdges[i][-1]));
+			print(self.VEdges[i][j], end="");
+			print(" "*4, end="");
+			print(self.DEdges[i][j], end="");
+			print(" "*4, end="");
+		print(self.VEdges[i][-1]);
 		
 		print(" "*2, end="");
 		for j in range(self.width-1):
-			print('|', end=" "*9);
+			print('|', end="");
+			print(" "*6, end="");
+			print("\\", end="")
+			print(" "*2, end="");
 		print('|');
 	
 	def printGrid(self):
@@ -138,7 +147,3 @@ class Grid(object):
 butt = Grid(4,3);
 butt.printGrid();
 #butt.recGrid();
-butt.dynGridA();
-butt.printGrid();
-butt.dynGridB();
-butt.printGrid();
