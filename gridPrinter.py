@@ -37,10 +37,6 @@ class Grid(object):
 			self.VEdges.append([]);
 			for j in range(self.width):
 				self.VEdges[i].append(random.randrange(0, 10, 1));
-		#current position
-		self.cP=[0,0];
-		#current distance
-		self.cD=0;
 	
 	def printRow(self, i):
 		for j in range(self.width-1):
