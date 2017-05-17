@@ -110,6 +110,7 @@ class Grid(object):
 			for j in range(self.height): #j is y, uses vertical
 				x = 0;
 				y = 0;
+				d = 0;
 				if(i==0 and j==0):
 					S[0].append(0);
 					continue
@@ -117,10 +118,11 @@ class Grid(object):
 					y= S[i][j-1] + self.VEdges[j-1][i];
 				if(i!=0): #check the path that led right to current node
 					x= S[i-1][j] + self.HEdges[j][i-1];
-				S[i].append(max(x, y)); #adding to the local storage for the function's uses
-				self.nodes[j][i] = (max(x, y)); #adding to the Grid object instance
-		print(S);
-		print(self.nodes);
+				if(i!=0 and j!=0): #check the path that led diagonally down-right
+					#self.DEdges[y,x]
+					d = S[i-1][j-1] + self.DEdges[j-1][i-1];
+				S[i].append(max(x, y, d)); #adding to the local storage for the function's uses
+				self.nodes[j][i] = (max(x, y, d)); #adding to the Grid object instance
 		return S[self.width-1][self.height-1];
 	
 	def dynGridB(self):
@@ -130,6 +132,7 @@ class Grid(object):
 			for B in range(self.width): #B is x, uses horizontal
 				x = 0;
 				y = 0;
+				d = 0;
 				if(A==0 and B==0):
 					S[0].append(0);
 					continue
@@ -137,13 +140,13 @@ class Grid(object):
 					y = S[A-1][B] + self.VEdges[A-1][B];
 				if(B!=0): #check the path that led right to current node
 					x = S[A][B-1] + self.HEdges[A][B-1];	
-				S[A].append(max(x, y)); #adding to the local storage for the function's uses
-				self.nodes[A][B] = (max(x, y)); #adding to the Grid object instance
-		print(S);
-		print(self.nodes);
+				if(A!=0 and B!=0):
+					d = S[A-1][B-1] + self.DEdges[A-1][B-1];
+				S[A].append(max(x, y, d)); #adding to the local storage for the function's uses
+				self.nodes[A][B] = (max(x, y, d)); #adding to the Grid object instance
 		return S[self.height-1][self.width-1];
 
 
-butt = Grid(4,3);
+butt = Grid(6,6);
+butt.dynGridB();
 butt.printGrid();
-#butt.recGrid();
