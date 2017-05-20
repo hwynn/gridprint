@@ -15,10 +15,12 @@ def ourList(num):
 #these will look like #self.thing(x,y). This just indicates the axis of that thing and nothing else.
 
 class Grid(object):
-	def __init__(self, X=5, Y=5):
-		self.height = Y; #these should never change
-		self.width = X; #is there a way to make these const?
-		
+	def __init__(self, str1, str2):
+		word2 = [""]+list(str2);
+		word1 = [""]+list(str1);
+		self.height = len(word2); #one grid line per element in list
+		self.width = len(word1); #is there a way to make these const?
+
 		#2d array of blanks
 		self.nodes=[];					#self.nodes[y,x]
 		for i in range(self.height): #2d array of size [Y][X]
@@ -31,7 +33,7 @@ class Grid(object):
 			#add array of random int
 			self.HEdges.append([]);
 			for j in range(self.width-1):
-				self.HEdges[i].append(random.randrange(0, 10, 1));
+				self.HEdges[i].append(0);
 		
 		#2d array of vertical edges
 		self.VEdges = [];				#self.VEdges[y,x]
@@ -39,14 +41,14 @@ class Grid(object):
 			#add array of random int
 			self.VEdges.append([]);
 			for j in range(self.width):
-				self.VEdges[i].append(random.randrange(0, 10, 1));
+				self.VEdges[i].append(0);
 		
 		#2d array of diagonal edges
 		self.DEdges = [];				#self.DEdges[y,x]
 		for i in range(self.height-1):
 			self.DEdges.append([]);
 			for j in range(self.width-1):
-				self.DEdges[i].append(random.randrange(0, 10, 1));
+				self.DEdges[i].append(1);
 
 	def printRow(self, i):
 		for j in range(self.width-1):
