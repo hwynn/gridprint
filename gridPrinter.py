@@ -167,11 +167,11 @@ class Grid(object):
 					S[0].append(0);
 					continue
 				if(A!=0): #check the path that led down to current node
-					y = S[A-1][B] + self.VEdges[A-1][B];
+					y = S[A-1][B];
 				if(B!=0): #check the path that led right to current node
-					x = S[A][B-1] + self.HEdges[A][B-1];	
-				if(A!=0 and B!=0):
-					d = S[A-1][B-1] + self.DEdges[A-1][B-1];
+					x = S[A][B-1];	
+				if(B!=0 and A!=0 and self.word1[i]==self.word2[j]):
+					d = S[A-1][B-1] + 1;
 				S[A].append(max(x, y, d)); #adding to the local storage for the function's uses
 				self.nodes[A][B] = (max(x, y, d)); #adding to the Grid object instance
 		return S[self.height-1][self.width-1];
