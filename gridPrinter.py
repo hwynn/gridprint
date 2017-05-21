@@ -16,8 +16,8 @@ def ourList(num):
 
 class Grid(object):
 	def __init__(self, str1, str2):
-		self.word2 = [""]+list(str2);
-		self.word1 = [""]+list(str1);
+		self.word2 = [" "]+list(str2);
+		self.word1 = [" "]+list(str1);
 		self.height = len(self.word2); #one grid line per element in list
 		self.width = len(self.word1); #is there a way to make these const?
 
@@ -85,26 +85,22 @@ class Grid(object):
 			self.printRow(x);
 			self.printDown(x);
 		self.printRow(self.height-1);
-	
-	def tinyprintRow(self, i):
-		for j in range(self.width-1):
-			print("[", str(self.nodes[i][j]), "]", "---", sep="", end="");
-		print("[", self.nodes[i][-1], "]",sep="");
-	
-	def tinyprintDown(self, i):
-		print(" "*1, end="");
-		for j in range(self.width-1):
-			print('|', end="");
-			print(" "*2, end="");
-			print("\\", end="")
-			print(" "*2, end="");
-		print('|');
 
 	def tinyprintGrid(self):
-		for x in range(self.height-1):
-			self.tinyprintRow(x);
-			self.tinyprintDown(x);
-		self.tinyprintRow(self.height-1);
+		for i in range(self.height-1):
+			#print row
+			for j in range(self.width-1):
+				print("[", str(self.nodes[i][j]), "]", "---", sep="", end="");
+			print("[", self.nodes[i][-1], "]",sep="");
+			#print down
+			print(" "*1, end="");
+			for j in range(self.width-1):
+				print('|', " "*2,"\\"," "*2, sep="", end="");
+			print('|');
+		#print last row
+		for j in range(self.width-1):
+			print("[", str(self.nodes[self.height-1][j]), "]", "---", sep="", end="");
+		print("[", self.nodes[self.height-1][-1], "]",sep="");
 		
 	def recGrid(self):
 		return self.MT(self.width-1, self.height-1);
