@@ -16,10 +16,10 @@ def ourList(num):
 
 class Grid(object):
 	def __init__(self, str1, str2):
-		word2 = [""]+list(str2);
-		word1 = [""]+list(str1);
-		self.height = len(word2); #one grid line per element in list
-		self.width = len(word1); #is there a way to make these const?
+		self.word2 = [""]+list(str2);
+		self.word1 = [""]+list(str1);
+		self.height = len(self.word2); #one grid line per element in list
+		self.width = len(self.word1); #is there a way to make these const?
 
 		#2d array of blanks
 		self.nodes=[];					#self.nodes[y,x]
@@ -85,6 +85,27 @@ class Grid(object):
 			self.printRow(x);
 			self.printDown(x);
 		self.printRow(self.height-1);
+	
+	def tinyprintRow(self, i):
+		for j in range(self.width-1):
+			print("[", str(self.nodes[i][j]), "]", "---", sep="", end="");
+		print("[", self.nodes[i][-1], "]",sep="");
+	
+	def tinyprintDown(self, i):
+		print(" "*1, end="");
+		for j in range(self.width-1):
+			print('|', end="");
+			print(" "*2, end="");
+			print("\\", end="")
+			print(" "*2, end="");
+		print('|');
+
+	def tinyprintGrid(self):
+		for x in range(self.height-1):
+			self.tinyprintRow(x);
+			self.tinyprintDown(x);
+		self.tinyprintRow(self.height-1);
+		
 	def recGrid(self):
 		return self.MT(self.width-1, self.height-1);
 	#recursively finds heaviest path to given point
@@ -102,7 +123,7 @@ class Grid(object):
 			x = self.MT(n-1,m) + self.HEdges[m][n-1];
 		self.nodes[m][n] = max(x, y); #we honestly don't need to do this. But it's proof the algorithm is recursing
 		return max(x, y);
-	#self.nodes[y,x] [word2,word1]
+	#self.nodes[y,x] [self.word2,self.word1]
 	#self.HEdges[y,x]
 	#self.VEdges[y,x]
 	def dynGridA(self):
@@ -120,7 +141,7 @@ class Grid(object):
 					y= S[i][j-1];
 				if(i!=0): #check the path that led right to current node
 					x= S[i-1][j];
-				if(i!=0 and j!=0 and word1[i]==word2[j]): #check the path that led diagonally down-right
+				if(i!=0 and j!=0 and self.word1[i]==self.word2[j]): #check the path that led diagonally down-right
 					#self.DEdges[y,x]
 					d = S[i-1][j-1] + 1;
 				S[i].append(max(x, y, d)); #adding to the local storage for the function's uses
@@ -149,6 +170,7 @@ class Grid(object):
 		return S[self.height-1][self.width-1];
 
 
-butt = Grid(6,6);
-butt.dynGridB();
+butt = Grid("ATGTTAT","ATCGTAC");
+butt.dynGridA();
 butt.printGrid();
+butt.tinyprintGrid();
