@@ -88,16 +88,19 @@ class Grid(object):
 
 	def tinyprintGrid(self):
 		for i in range(self.height-1):
+			#print word2
+			print(self.word2[i], " "*2, sep="", end="");
 			#print row
 			for j in range(self.width-1):
 				print("[", str(self.nodes[i][j]), "]", "---", sep="", end="");
 			print("[", self.nodes[i][-1], "]",sep="");
 			#print down
-			print(" "*1, end="");
+			print(" "*3," "*1, sep="", end="");
 			for j in range(self.width-1):
 				print('|', " "*2,"\\"," "*2, sep="", end="");
 			print('|');
 		#print last row
+		print(self.word2[-1], " "*2, sep="", end="");
 		for j in range(self.width-1):
 			print("[", str(self.nodes[self.height-1][j]), "]", "---", sep="", end="");
 		print("[", self.nodes[self.height-1][-1], "]",sep="");
