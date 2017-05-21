@@ -102,13 +102,13 @@ class Grid(object):
 			x = self.MT(n-1,m) + self.HEdges[m][n-1];
 		self.nodes[m][n] = max(x, y); #we honestly don't need to do this. But it's proof the algorithm is recursing
 		return max(x, y);
-	#self.nodes[y,x]
+	#self.nodes[y,x] [word2,word1]
 	#self.HEdges[y,x]
 	#self.VEdges[y,x]
 	def dynGridA(self):
 		S = [];
 		for i in range(self.width): #i is x, uses horizontal
-			S.append([]);				#S[x,y];
+			S.append([]);				#S[x,y];	#S[i,j];	[word1, word2]
 			for j in range(self.height): #j is y, uses vertical
 				x = 0;
 				y = 0;
@@ -117,12 +117,12 @@ class Grid(object):
 					S[0].append(0);
 					continue
 				if(j!=0): #check the path that led down to current node
-					y= S[i][j-1] + self.VEdges[j-1][i];
+					y= S[i][j-1];
 				if(i!=0): #check the path that led right to current node
-					x= S[i-1][j] + self.HEdges[j][i-1];
-				if(i!=0 and j!=0): #check the path that led diagonally down-right
+					x= S[i-1][j];
+				if(i!=0 and j!=0 and word1[i]==word2[j]): #check the path that led diagonally down-right
 					#self.DEdges[y,x]
-					d = S[i-1][j-1] + self.DEdges[j-1][i-1];
+					d = S[i-1][j-1] + 1;
 				S[i].append(max(x, y, d)); #adding to the local storage for the function's uses
 				self.nodes[j][i] = (max(x, y, d)); #adding to the Grid object instance
 		return S[self.width-1][self.height-1];
