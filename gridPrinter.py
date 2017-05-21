@@ -87,6 +87,11 @@ class Grid(object):
 		self.printRow(self.height-1);
 
 	def tinyprintGrid(self):
+		print(" "*4, end="");
+		for j in range(self.width-1):
+			print(self.word1[j], " "*5, sep="", end="");
+		print(self.word1[-1]);
+		print("");
 		for i in range(self.height-1):
 			#print word2
 			print(self.word2[i], " "*2, sep="", end="");
