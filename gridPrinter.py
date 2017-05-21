@@ -176,7 +176,47 @@ class Grid(object):
 				self.nodes[A][B] = (max(x, y, d)); #adding to the Grid object instance
 		return S[self.height-1][self.width-1];
 
+	def recBackCall(self):
+		return self.recBacktrace(self.width-1, self.height-1);
+		
+	def recBacktrace(self, x, y, CPath=[[]]):
+		#make new list to put our old list into (copies if needed)
+		pathList = copy.deepcopy(CPath); #we will append the current position to all paths in this
+		print("list of paths: ");
+		for path in pathList:
+			path.append([x,y]);
+			print(path);
+		print("distance from origin at current position",self.nodes[y][x]);
+		print("characters at current position:",self.word1[x], self.word2[y]);
+		
+		nextPaths = []; #we will append entire paths to this
+		if(x==0 and y==0):
+			return pathList;
+		#self.nodes[y,x]
+		#did we come from above?
+		if(y!=0):
+			if(self.nodes[y][x] == self.nodes[y-1][x]):
+				print(x);
+				print(y-1);
+				print(pathList);
+				print(self.recBacktrace(x,(y-1), pathList));
+				#nextPaths = nextPaths + self.recBacktrace([x,y-1, pathList]);
+		print(nextPaths);
+		
+		return pathList;
+			
+		#did we come from the left?
+			
+		#did we come diagonally?
+			
+
 
 butt = Grid("ATGTTAT","ATCGTAC");
 butt.dynGridA();
 butt.tinyprintGrid();
+
+butt.recBacktrace(5,5,[[[5,6]]]);
+print("");
+#butt.recBacktrace(5,6);
+#butt.recBacktrace(5,6, [[[7,7],[6,7],[6,6],[5,5]],[[7,7],[7,6],[6,6],[5,5]]]);
+butt.recBackCall();
