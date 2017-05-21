@@ -102,7 +102,10 @@ class Grid(object):
 			#print down
 			print(" "*3," "*1, sep="", end="");
 			for j in range(self.width-1):
-				print('|', " "*2,"\\"," "*2, sep="", end="");
+				if(self.word1[j+1]==self.word2[i+1]):
+					print('|', " "*2,"\\"," "*2, sep="", end="");
+				else:
+					print('|', " "*5, sep="", end="");
 			print('|');
 		#print last row
 		print(self.word2[-1], " "*2, sep="", end="");
@@ -176,5 +179,4 @@ class Grid(object):
 
 butt = Grid("ATGTTAT","ATCGTAC");
 butt.dynGridA();
-butt.printGrid();
 butt.tinyprintGrid();
