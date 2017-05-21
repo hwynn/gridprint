@@ -183,7 +183,7 @@ class Grid(object):
 		for path in pathList:
 			path.append([x,y]);
 			#print(path);
-		print("x:", x, " y:", y);
+		#print("x:", x, " y:", y);
 		#print("characters at current position:",self.word1[x], self.word2[y]);
 		
 		nextPaths = []; #we will append entire paths to this
@@ -222,7 +222,7 @@ class Grid(object):
 		
 		#did we come diagonally?
 		if(x!=0 and y!=0):
-			if(self.nodes[y][x] == (self.nodes[y-1][x-1])+1):
+			if(self.word1[x]==self.word2[y]):
 				nextPaths = copy.deepcopy(nextPaths) + copy.deepcopy(self.recBacktrace(x-1,y-1, pathList));
 				"""if(x==4 and y==5):
 					print("inside conditional");
@@ -250,6 +250,8 @@ butt.tinyprintGrid();
 
 
 print("");
-butt.recBacktrace(7,7);
+myList = butt.recBacktrace(4,5);
+for x in myList:
+	print(x);
 print("");
 #butt.recBacktrace(4,5, [[[7,7],[6,7],[6,6],[5,5]],[[7,7],[7,6],[6,6],[5,5]]]);
