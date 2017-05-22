@@ -247,7 +247,30 @@ class Grid(object):
 			print(path[i][0], end="  ");
 		print("");
 
-butt = Grid("ATCGTAC","ATGTTAT"); #Grid(W,V)
+	def fillTable(self): 	#an alternative to dynGridA
+		for i in range(1, self.width): #initializing first row to be edit costs
+			self.nodes[0][i]=i;
+		for j in range(1, self.height): #initializing first column to be edit costs
+			self.nodes[j][0]=j;
+
+		for i in range(1, self.width): #i is x, uses horizontal
+			for j in range(1, self.height): #j is y, uses vertical
+				x = 0;
+				y = 0;
+				d = 0;
+				#check the path that led down to current node
+				y= self.nodes[j-1][i];
+				#check the path that led right to current node
+				x= self.nodes[j][i-1];
+				if(self.word1[i]==self.word2[j]): #check the path that led diagonally down-right
+					#self.DEdges[y,x]
+					d = self.nodes[j-1][i-1] + 1;
+				self.nodes[j][i] = (max(x, y, d)); #adding to the Grid object instance
+		return self.nodes[self.height-1][self.width-1];
+		
+#butt = Grid("ATCTGATC","TGCATAC"); #Grid(W,V) (top, side)
+#butt = Grid("ATCG","ATGT");
+butt = Grid("ATCGTAC","ATGTTAT");
 butt.dynGridA();
 butt.tinyprintGrid();
 myPaths = butt.recBackTrigger();
