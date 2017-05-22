@@ -119,26 +119,6 @@ class Grid(object):
 			print("[", str(self.nodes[self.height-1][j]), "]", "---", sep="", end="");
 		print("[", self.nodes[self.height-1][-1], "]",sep="");
 		
-	def recGrid(self):
-		return self.MT(self.width-1, self.height-1);
-	#recursively finds heaviest path to given point
-	def MT(self, n,m): 					#self.MT(x,y) 
-		if(n<0 or n>=self.width or m<0 or m>=self.height):
-			print("error: given coordinates are outside of grid boundary");
-			return 0;
-		if(n==0 and m==0):
-			return 0;
-		x=0;
-		y=0;
-		if(m!=0):
-			y = self.MT(n,m-1) + self.VEdges[m-1][n];
-		if(n!=0):
-			x = self.MT(n-1,m) + self.HEdges[m][n-1];
-		self.nodes[m][n] = max(x, y); #we honestly don't need to do this. But it's proof the algorithm is recursing
-		return max(x, y);
-	#self.nodes[y,x] [self.word2,self.word1]
-	#self.HEdges[y,x]
-	#self.VEdges[y,x]
 	def dynGridA(self):
 		S = [];
 		for i in range(self.width): #i is x, uses horizontal
