@@ -89,12 +89,19 @@ class Grid(object):
 	def tinyprintGrid(self):
 		print(" "*4, end="");
 		for j in range(self.width-1):
-			print(self.word1[j], " "*5, sep="", end="");
+			#print word1
+			if(j==0):
+				print("W", " "*5, sep="", end="");
+			else:
+				print(self.word1[j], " "*5, sep="", end="");
 		print(self.word1[-1]);
 		print("");
 		for i in range(self.height-1):
 			#print word2
-			print(self.word2[i], " "*2, sep="", end="");
+			if(i==0):
+				print("V", " "*2, sep="", end="");
+			else:
+				print(self.word2[i], " "*2, sep="", end="");
 			#print row
 			for j in range(self.width-1):
 				print("[", str(self.nodes[i][j]), "]", "---", sep="", end="");
@@ -210,10 +217,20 @@ class Grid(object):
 	def printAlignment(self, path):
 		print(" "*4, end="");
 		for i in range(len(path)):
-			print(path[i][0], end=" "*2);
-			
+			print(path[i][1], end=" "*2);
+					
 		print("");
-		print("X:", " "*5, sep="", end="");
+		print("V:", " "*5, sep="", end="");
+
+		for i in range(len(path)):
+			if(i!=0):	#This is flawed if skips can happen at the first character
+				if(path[i][1]==path[i-1][1]): #this indicates a skip. 
+					print("-", " "*2, sep="", end="");					
+				else:
+					print(self.word2[path[i][1]], " "*2, sep="", end="");
+		
+		print("");
+		print("W:", " "*5, sep="", end="");
 
 		for i in range(len(path)):
 			if(i!=0):	#This is flawed if skips can happen at the first character
@@ -222,25 +239,15 @@ class Grid(object):
 					print("-", " "*2, sep="", end="");
 				else:
 					print(self.word1[path[i][0]], " "*2, sep="", end="");	
-					
-		print("");
-		print("Y:", " "*5, sep="", end="");
-
-		for i in range(len(path)):
-			if(i!=0):	#This is flawed if skips can happen at the first character
-				if(path[i][1]==path[i-1][1]): #this indicates a skip. 
-					print("-", " "*2, sep="", end="");					
-				else:
-					print(self.word2[path[i][1]], " "*2, sep="", end="");
 
 		print("");
 		print(" "*4, end="");
 					
 		for i in range(len(path)):
-			print(path[i][1], end="  ");
+			print(path[i][0], end="  ");
 		print("");
 
-butt = Grid("ATCGTAC","ATGTTAT");
+butt = Grid("ATCGTAC","ATGTTAT"); #Grid(W,V)
 butt.dynGridA();
 butt.tinyprintGrid();
 myPaths = butt.recBackTrigger();
