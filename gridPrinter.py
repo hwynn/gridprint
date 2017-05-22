@@ -24,7 +24,6 @@ class Grid(object):
 		#2d array of blanks
 		self.nodes=[];					#self.nodes[y,x]
 		for i in range(self.height): #2d array of size [Y][X]
-			#self.nodes.append(["+"]*self.width); #[["+", "+", "+", "+", "+"]] intended result
 			self.nodes.append([0]*self.width);
 		
 		#2d array of horizontal edges
@@ -152,9 +151,9 @@ class Grid(object):
 					S[0].append(0);
 					continue
 				if(j!=0): #check the path that led down to current node
-					y= S[i][j-1];
+					y= S[i][j-1]+0;
 				if(i!=0): #check the path that led right to current node
-					x= S[i-1][j];
+					x= S[i-1][j]+0;
 				if(i!=0 and j!=0 and self.word1[i]==self.word2[j]): #check the path that led diagonally down-right
 					#self.DEdges[y,x]
 					d = S[i-1][j-1] + 1;
@@ -174,9 +173,9 @@ class Grid(object):
 					S[0].append(0);
 					continue
 				if(A!=0): #check the path that led down to current node
-					y = S[A-1][B]; #deletions
+					y = S[A-1][B]+0; #deletions
 				if(B!=0): #check the path that led right to current node
-					x = S[A][B-1];	#insertions
+					x = S[A][B-1]+0;	#insertions
 				if(B!=0 and A!=0 and self.word1[i]==self.word2[j]):
 					d = S[A-1][B-1] + 1; #matches
 				S[A].append(max(x, y, d)); #adding to the local storage for the function's uses
@@ -247,26 +246,6 @@ class Grid(object):
 			print(path[i][0], end="  ");
 		print("");
 
-	def fillTable(self): 	#an alternative to dynGridA
-		for i in range(1, self.width): #initializing first row to be edit costs
-			self.nodes[0][i]=i;
-		for j in range(1, self.height): #initializing first column to be edit costs
-			self.nodes[j][0]=j;
-
-		for i in range(1, self.width): #i is x, uses horizontal
-			for j in range(1, self.height): #j is y, uses vertical
-				x = 0;
-				y = 0;
-				d = 0;
-				#check the path that led down to current node
-				y= self.nodes[j-1][i];
-				#check the path that led right to current node
-				x= self.nodes[j][i-1];
-				if(self.word1[i]==self.word2[j]): #check the path that led diagonally down-right
-					#self.DEdges[y,x]
-					d = self.nodes[j-1][i-1] + 1;
-				self.nodes[j][i] = (max(x, y, d)); #adding to the Grid object instance
-		return self.nodes[self.height-1][self.width-1];
 		
 #butt = Grid("ATCTGATC","TGCATAC"); #Grid(W,V) (top, side)
 #butt = Grid("ATCG","ATGT");
