@@ -175,17 +175,20 @@ class Grid(object):
 				S[A].append(max(x, y, d)); #adding to the local storage for the function's uses
 				self.nodes[A][B] = (max(x, y, d)); #adding to the Grid object instance
 		return S[self.height-1][self.width-1];
-
+	
+	def recBackTrigger(self):
+		myList = self.recBacktrace(self.width-1,self.height-1);
+		for x in myList:
+			x.reverse();
+			#print(x);
+		return myList;
+		
 	def recBacktrace(self, x, y, CPath=[[]]):
 		#make new list to put our old list into (copies if needed)
 		pathList = copy.deepcopy(CPath); #we will append the current position to all paths in this
 		#print("list of paths: ");
 		for path in pathList:
-			path.append([x,y]);
-			#print(path);
-		#print("x:", x, " y:", y);
-		#print("characters at current position:",self.word1[x], self.word2[y]);
-		
+			path.append([x,y]);		
 		nextPaths = []; #we will append entire paths to this
 		if(x==0 and y==0):
 			return pathList;
@@ -194,64 +197,53 @@ class Grid(object):
 		if(y!=0):
 			if(self.nodes[y][x] == self.nodes[y-1][x]):
 				nextPaths = copy.deepcopy(nextPaths) + copy.deepcopy(self.recBacktrace(x,y-1, pathList));
-				"""if(x==4 and y==5):
-					print("inside conditional");
-					print("pathList: ");
-					for path in pathList:
-						print(path);
-					print("nextPaths: ");
-					for path in nextPaths:
-						print(path);
-					print("copy.deepcopy(nextPaths): ", copy.deepcopy(nextPaths));
-					print("copy.deepcopy(self.recBacktrace(x,y-1, pathList)): ", self.recBacktrace(x,y-1, pathList));"""
 		#did we come from the left?
 		if(x!=0):
 			if(self.nodes[y][x] == self.nodes[y][x-1]):
-				nextPaths = copy.deepcopy(nextPaths) + copy.deepcopy(self.recBacktrace(x-1,y, pathList));
-
-				"""if(x==4 and y==5):
-					print("inside conditional");
-					print("pathList: ");
-					for path in pathList:
-						print(path);
-					print("nextPaths: ");
-					for path in nextPaths:
-						print(path);
-					print("copy.deepcopy(nextPaths): ", copy.deepcopy(nextPaths));
-					print("copy.deepcopy(self.recBacktrace(x,y-1, pathList)): ", self.recBacktrace(x,y-1, pathList));"""
-		
+				nextPaths = copy.deepcopy(nextPaths) + copy.deepcopy(self.recBacktrace(x-1,y, pathList));		
 		#did we come diagonally?
 		if(x!=0 and y!=0):
 			if(self.word1[x]==self.word2[y]):
 				nextPaths = copy.deepcopy(nextPaths) + copy.deepcopy(self.recBacktrace(x-1,y-1, pathList));
-				"""if(x==4 and y==5):
-					print("inside conditional");
-					print("pathList: ");
-					for path in pathList:
-						print(path);
-					print("nextPaths: ");
-					for path in nextPaths:
-						print(path);
-					print("copy.deepcopy(nextPaths): ", copy.deepcopy(nextPaths));
-					print("copy.deepcopy(self.recBacktrace(x,y-1, pathList)): ", self.recBacktrace(x,y-1, pathList));"""
-		#debugging
-		"""if(x==4 and y==5):
-			print("pathList: ");
-			for path in pathList:
-				print(path);
-			print("nextPaths: ");
-			for path in nextPaths:
-				print(path);"""
 		return copy.deepcopy(nextPaths);
+	
+	def printAlignment(self, path):
+		print(" "*4, end="");
+		for i in range(len(path)):
+			print(path[i][0], end=" "*2);
+			
+		print("");
+		print("X:", " "*5, sep="", end="");
 
-butt = Grid("ATGTTAT","ATCGTAC");
+		for i in range(len(path)):
+			if(i!=0):	#This is flawed if skips can happen at the first character
+				#print(path[i][0], path[i-1][0], end="");
+				if(path[i][0]==path[i-1][0]): #this indicates a skip. 
+					print("-", " "*2, sep="", end="");
+				else:
+					print(self.word1[path[i][0]], " "*2, sep="", end="");	
+					
+		print("");
+		print("Y:", " "*5, sep="", end="");
+
+		for i in range(len(path)):
+			if(i!=0):	#This is flawed if skips can happen at the first character
+				if(path[i][1]==path[i-1][1]): #this indicates a skip. 
+					print("-", " "*2, sep="", end="");					
+				else:
+					print(self.word2[path[i][1]], " "*2, sep="", end="");
+
+		print("");
+		print(" "*4, end="");
+					
+		for i in range(len(path)):
+			print(path[i][1], end="  ");
+		print("");
+
+butt = Grid("ATCGTAC","ATGTTAT");
 butt.dynGridA();
 butt.tinyprintGrid();
-
-
-print("");
-myList = butt.recBacktrace(4,5);
-for x in myList:
-	print(x);
-print("");
-#butt.recBacktrace(4,5, [[[7,7],[6,7],[6,6],[5,5]],[[7,7],[7,6],[6,6],[5,5]]]);
+myPaths = butt.recBackTrigger();
+for x in myPaths:
+	butt.printAlignment(x);
+	print("");
