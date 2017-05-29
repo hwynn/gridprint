@@ -77,8 +77,9 @@ class Grid(object):
 [0, -1, -1, -1, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, 0, 0, -2, -1, -1, -1, -1, -1, -4],
 [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, 1]];
 	
-	def DeltaBLOSUM(self, vi, wi):
-		return self.Bindex[self.vx.index(vi)][self.vx.index(wi)];
+	def DeltaBLOSUM(self, vi, wj):
+		return self.Bindex[self.vx.index(vi)][self.vx.index(wj)];
+		#this could use some error checking
 
 	def printRow(self, i):
 		for j in range(self.width-1):
@@ -257,7 +258,8 @@ class Grid(object):
 			print(path[i][0], end="  ");
 		print("");
 
-	
+	def localAlign(self, i1, j1, i2, j2):
+		#i1 < i2, j1 < j2, i1>=0, j1>=0, i2 < self.height, j2 < self.width
 		
 #butt = Grid("ATCTGATC","TGCATAC"); #Grid(W,V) (top, side)
 #butt = Grid("ATCG","ATGT");
