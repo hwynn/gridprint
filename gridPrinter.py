@@ -156,21 +156,19 @@ class Grid(object):
 		for i in range(self.width): #i is x, uses horizontal
 			S.append([]);				#S[x,y];	#S[i,j];	[word1, word2]
 			for j in range(self.height): #j is y, uses vertical
-				x = 0;
-				y = 0;
-				d = 0;
+				next=0;			
 				if(i==0 and j==0):
 					S[0].append(0);
 					continue
 				if(j!=0): #check the path that led down to current node
-					y= S[i][j-1]+0;
+					next= max(next, (S[i][j-1]+0));
 				if(i!=0): #check the path that led right to current node
-					x= S[i-1][j]+0;
+					next= max(next, (S[i-1][j]+0));
 				if(i!=0 and j!=0 and self.word1[i]==self.word2[j]): #check the path that led diagonally down-right
 					#self.DEdges[y,x]
-					d = S[i-1][j-1] + 1;
-				S[i].append(max(x, y, d)); #adding to the local storage for the function's uses
-				self.nodes[j][i] = (max(x, y, d)); #adding to the Grid object instance
+					next= max(next, (S[i-1][j-1] + 1));
+				S[i].append(next); #adding to the local storage for the function's uses
+				self.nodes[j][i] = (next); #adding to the Grid object instance
 		return S[self.width-1][self.height-1];
 	
 	def dynGridB(self):
@@ -258,9 +256,10 @@ class Grid(object):
 			print(path[i][0], end="  ");
 		print("");
 
-	def localAlign(self, v, w):
+	#def localAlign(self, v, w):
 		#v and w in local alignment are substrings of the self.word1 and self.word2 strings. 
 		#alignments will have to be adjusted to reflect their positions in the global edit graph. 
+		
 		
 #butt = Grid("ATCTGATC","TGCATAC"); #Grid(W,V) (top, side)
 #butt = Grid("ATCG","ATGT");
