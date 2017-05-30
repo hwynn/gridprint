@@ -258,8 +258,9 @@ class Grid(object):
 			print(path[i][0], end="  ");
 		print("");
 
-	def localAlign(self, i1, j1, i2, j2):
-		#i1 < i2, j1 < j2, i1>=0, j1>=0, i2 < self.height, j2 < self.width
+	def localAlign(self, v, w):
+		#v and w in local alignment are substrings of the self.word1 and self.word2 strings. 
+		#alignments will have to be adjusted to reflect their positions in the global edit graph. 
 		
 #butt = Grid("ATCTGATC","TGCATAC"); #Grid(W,V) (top, side)
 #butt = Grid("ATCG","ATGT");
