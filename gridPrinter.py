@@ -151,25 +151,27 @@ class Grid(object):
 			print("[", str(self.nodes[self.height-1][j]), "]", "---", sep="", end="");
 		print("[", self.nodes[self.height-1][-1], "]",sep="");
 		
-	def dynGridA(self):
+	def dynGridB(self):
 		S = [];
-		for i in range(self.width): #i is x, uses horizontal
-			S.append([]);				#S[x,y];	#S[i,j];	[word1, word2]
-			for j in range(self.height): #j is y, uses vertical
-				next=0;			
-				if(i==0 and j==0):
+		for A in range(self.height): #A is y, uses vertical
+			S.append([]);				#S[y,x];
+			for B in range(self.width): #B is x, uses horizontal
+				x = 0;
+				y = 0;
+				d = 0;
+				if(A==0 and B==0):
 					S[0].append(0);
 					continue
-				if(j!=0): #check the path that led down to current node
-					next= max(next, (S[i][j-1]+0));
-				if(i!=0): #check the path that led right to current node
-					next= max(next, (S[i-1][j]+0));
-				if(i!=0 and j!=0 and self.word1[i]==self.word2[j]): #check the path that led diagonally down-right
-					#self.DEdges[y,x]
-					next= max(next, (S[i-1][j-1] + 1));
-				S[i].append(next); #adding to the local storage for the function's uses
-				self.nodes[j][i] = (next); #adding to the Grid object instance
-		return S[self.width-1][self.height-1];
+				if(A!=0): #check the path that led down to current node
+					y = S[A-1][B]+0; #deletions
+				if(B!=0): #check the path that led right to current node
+					x = S[A][B-1]+0;	#insertions
+				if(B!=0 and A!=0 and self.word1[B]==self.word2[A]):
+					d = S[A-1][B-1] + 1; #matches
+				S[A].append(max(x, y, d)); #adding to the local storage for the function's uses
+				self.nodes[A][B] = (max(x, y, d)); #adding to the Grid object instance
+		return S[self.height-1][self.width-1];
+
 	
 	def recBackTrigger(self):
 		myList = self.recBacktrace(self.width-1,self.height-1);
@@ -240,28 +242,29 @@ class Grid(object):
 		#alignments will have to be adjusted to reflect their positions in the global edit graph. 
 		#so some other function should be in charge of calling and adjusting the results of this
 		S = [];
-		for i in range(self.width): #i is x, uses horizontal
-			S.append([]);				#S[x,y];	#S[i,j];	[word1, word2]
-			for j in range(self.height): #j is y, uses vertical
-				next=0;			
+		for i in range(len(v)+1): #i is y, uses vertical
+			S.append([]);				#S[y,x];
+			for j in range(len(w)+1): #j is x, uses horizontal
+				next=0;
 				if(i==0 and j==0):
 					S[0].append(0);
 					continue
-				if(j!=0): #check the path that led down to current node
-					next= max(next, (S[i][j-1]+0));
-				if(i!=0): #check the path that led right to current node
-					next= max(next, (S[i-1][j]+0));
-				if(i!=0 and j!=0 and self.word1[i]==self.word2[j]): #check the path that led diagonally down-right
-					#self.DEdges[y,x]
-					next= max(next, (S[i-1][j-1] + 1));
+				if(i!=0): #check the path that led down to current node
+					next = max(next, (S[i-1][j]+0)); #deletions
+				if(j!=0): #check the path that led right to current node
+					next = max(next, (S[i][j-1]+0));	#insertions
+				if(j!=0 and i!=0 and self.word2[i]==self.word1[j]):
+					next = max(next, (S[i-1][j-1] + 1)); #matches
 				S[i].append(next); #adding to the local storage for the function's uses
-				self.nodes[j][i] = (next); #adding to the Grid object instance
-		return S[self.width-1][self.height-1];
+				self.nodes[i][j] = (next); #adding to the Grid object instance
+		return S[len(v)][len(w)];
+
 		
 		
 #butt = Grid("ATCTGATC","TGCATAC"); #Grid(W,V) (top, side)
 #butt = Grid("ATCG","ATGT");
 butt = Grid("ATCGTAC","ATGTTAT");
+#butt.dynGridB();
 butt.localAlign("ATCGTAC","ATGTTAT");
 butt.tinyprintGrid();
 myPaths = butt.recBackTrigger();
