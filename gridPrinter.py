@@ -171,27 +171,6 @@ class Grid(object):
 				self.nodes[j][i] = (next); #adding to the Grid object instance
 		return S[self.width-1][self.height-1];
 	
-	def dynGridB(self):
-		S = [];
-		for A in range(self.height): #A is y, uses vertical
-			S.append([]);				#S[y,x];
-			for B in range(self.width): #B is x, uses horizontal
-				x = 0;
-				y = 0;
-				d = 0;
-				if(A==0 and B==0):
-					S[0].append(0);
-					continue
-				if(A!=0): #check the path that led down to current node
-					y = S[A-1][B]+0; #deletions
-				if(B!=0): #check the path that led right to current node
-					x = S[A][B-1]+0;	#insertions
-				if(B!=0 and A!=0 and self.word1[i]==self.word2[j]):
-					d = S[A-1][B-1] + 1; #matches
-				S[A].append(max(x, y, d)); #adding to the local storage for the function's uses
-				self.nodes[A][B] = (max(x, y, d)); #adding to the Grid object instance
-		return S[self.height-1][self.width-1];
-	
 	def recBackTrigger(self):
 		myList = self.recBacktrace(self.width-1,self.height-1);
 		for x in myList:
@@ -259,6 +238,8 @@ class Grid(object):
 	#def localAlign(self, v, w):
 		#v and w in local alignment are substrings of the self.word1 and self.word2 strings. 
 		#alignments will have to be adjusted to reflect their positions in the global edit graph. 
+		#so some other function should be in charge of calling and adjusting the results of this
+		
 		
 		
 #butt = Grid("ATCTGATC","TGCATAC"); #Grid(W,V) (top, side)
