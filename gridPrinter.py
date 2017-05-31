@@ -477,9 +477,16 @@ def localAlign(y, x):
 			U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
 			#main level. diagonal edges			matches/mismatches
 			S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
-	ourPaths = recBackTrigger(y, x, S);
-	#print(y, x, S);
-	#print(recBackTrigger(y, x, S));
+			#note: There could be instances in which one path is equal to another. This is what recBacktrace() is for. 
+			#but the extra layers make finding all possible paths too complex for the moment. This possibility can be revisited.
+			#This would be a good place to test if multiple paths occur, if we want to explore that option.
+	
+	ourPaths = recBacktrace(y, x, S,len(x),len(y));
+	for z in ourPaths:
+		z.reverse();
+	
+	#print(y, x, ourPaths);
+	print(recBackTrigger(y, x, S));
 	return (S, ourPaths);
 
 def alignmentProcess(word1, word2):
