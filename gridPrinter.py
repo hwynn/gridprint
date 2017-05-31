@@ -241,29 +241,22 @@ class Grid(object):
 		#v and w in local alignment are substrings of the self.word1 and self.word2 strings. 
 		#alignments will have to be adjusted to reflect their positions in the global edit graph. 
 		#so some other function should be in charge of calling and adjusting the results of this
-			V=[" "]+list(y);
-			W=[" "]+list(x);
-			S = [];
-			S.append([0]*(len(W)));
-			for i in range(len(V)-1):
-				S.append(([0]+[None]*(len(W)-1)));
+		V=[" "]+list(y);
+		W=[" "]+list(x);
+		S = [];
+		S.append([0]*(len(W)));
+		for i in range(len(V)-1):
+			S.append(([0]+[None]*(len(W)-1)));
 		
 		#we need to initialize the first row and column with 0's like on powerpoint4 page 13
-		for i in range(1,len(v)+1): #i is y, uses vertical
+		for i in range(1,len(V)): #i is y, uses vertical
 			S.append([]);				#S[y,x];
-			for j in range(1,len(w)+1): #j is x, uses horizontal
-				next=0;
-				if(i==0 and j==0):
-					continue
-				if(i!=0): #check the path that led down to current node
-					next = max(next, (S[i-1][j]+0)); #deletions
-				if(j!=0): #check the path that led right to current node
-					next = max(next, (S[i][j-1]+0));	#insertions
-				if(j!=0 and i!=0 and v[i-1]==w[j-1]):
-					next = max(next, (S[i-1][j-1] + 1)); #matches
+			for j in range(1,len(W)): #j is x, uses horizontal
+				print(i-1, len(S), j, len(S[i]));
+				next = max(0, (S[i-1][j]+0), (S[i][j-1]+0), (S[i-1][j-1] + 1)); #free ride, deletions, insertions, matche or mismatch
 				S[i][j] = next; #adding to the local storage for the function's uses
 				self.nodes[i][j] = (next); #adding to the Grid object instance
-		return S[len(v)][len(w)];
+		return S[len(V)-1][len(W)-1];
 
 #butt = Grid("ATCTGATC","TGCATAC"); #Grid(W,V) (top, side)
 #butt = Grid("ATCG","ATGT");
