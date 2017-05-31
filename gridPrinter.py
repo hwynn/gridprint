@@ -32,7 +32,7 @@ class Grid(object):
 			#add array of random int
 			self.HEdges.append([]);
 			for j in range(self.width-1):
-				self.HEdges[i].append(0);
+				self.HEdges[i].append(None);
 		
 		#2d array of vertical edges
 		self.VEdges = [];				#self.VEdges[y,x]
@@ -40,14 +40,14 @@ class Grid(object):
 			#add array of random int
 			self.VEdges.append([]);
 			for j in range(self.width):
-				self.VEdges[i].append(0);
+				self.VEdges[i].append(None);
 		
 		#2d array of diagonal edges
 		self.DEdges = [];				#self.DEdges[y,x]
 		for i in range(self.height-1):
 			self.DEdges.append([]);
 			for j in range(self.width-1):
-				self.DEdges[i].append(1);
+				self.DEdges[i].append(None);
 		
 		#BLOSUM stuff
 		self.vx = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V', 'B', 'Z', 'X', '-'];
@@ -170,6 +170,8 @@ class Grid(object):
 					d = S[A-1][B-1] + 1; #matches
 				S[A].append(max(x, y, d)); #adding to the local storage for the function's uses
 				self.nodes[A][B] = (max(x, y, d)); #adding to the Grid object instance
+				
+				
 		return S[self.height-1][self.width-1];
 
 	
@@ -246,23 +248,23 @@ class Grid(object):
 		S = [];
 		S.append([0]*(len(W)));
 		for i in range(len(V)-1):
-			S.append(([0]+[None]*(len(W)-1)));
+			S.append(([0]+[None]*(len(W)-1))); #fill in for free rides
+			
 		
-		#we need to initialize the first row and column with 0's like on powerpoint4 page 13
 		for i in range(1,len(V)): #i is y, uses vertical
 			S.append([]);				#S[y,x];
 			for j in range(1,len(W)): #j is x, uses horizontal
 				print(i-1, len(S), j, len(S[i]));
-				next = max(0, (S[i-1][j]+0), (S[i][j-1]+0), (S[i-1][j-1] + 1)); #free ride, deletions, insertions, matche or mismatch
-				S[i][j] = next; #adding to the local storage for the function's uses
+				next = max((S[i-1][j]+0), (S[i][j-1]+0), (S[i-1][j-1] + 1)); #deletions, insertions, matche or mismatch
+				S[i][j] = next; 
 				self.nodes[i][j] = (next); #adding to the Grid object instance
 		return S[len(V)-1][len(W)-1];
 
 #butt = Grid("ATCTGATC","TGCATAC"); #Grid(W,V) (top, side)
 #butt = Grid("ATCG","ATGT");
 butt = Grid("ATCGTAC","ATGTTAT");
-#butt.dynGridB();
-butt.localAlign("ATC","ATG");
+butt.dynGridB();
+#butt.localAlign("ATCGTAC","ATGTTAT");
 butt.tinyprintGrid();
 """myPaths = butt.recBackTrigger();
 for x in myPaths:
