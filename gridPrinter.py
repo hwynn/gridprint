@@ -161,27 +161,6 @@ class Grid(object):
 			if(self.word1[x]==self.word2[y]):
 				nextPaths = copy.deepcopy(nextPaths) + copy.deepcopy(self.oldRecBacktrace(x-1,y-1, pathList));
 		return copy.deepcopy(nextPaths);
-	
-	def localAlign(self, y, x):
-		#v and w in local alignment are substrings of the self.word1 and self.word2 strings. 
-		#alignments will have to be adjusted to reflect their positions in the global edit graph. 
-		#so some other function should be in charge of calling and adjusting the results of this
-		V=[" "]+list(y);
-		W=[" "]+list(x);
-		S = [];
-		S.append([0]*(len(W)));
-		for i in range(len(V)-1):
-			S.append(([0]+[None]*(len(W)-1))); #fill in for free rides
-			
-		
-		for i in range(1,len(V)): #i is y, uses vertical
-			S.append([]);				#S[y,x];
-			for j in range(1,len(W)): #j is x, uses horizontal
-				print(i-1, len(S), j, len(S[i]));
-				next = max((S[i-1][j]+0), (S[i][j-1]+0), (S[i-1][j-1] + 1)); #deletions, insertions, matche or mismatch
-				S[i][j] = next; 
-				self.nodes[i][j] = (next); #adding to the Grid object instance
-		return S[len(V)-1][len(W)-1];
 
 	def oldPrintAlignment(self, path):
 		print(" "*4, end="");
@@ -235,8 +214,8 @@ class Grid(object):
 
 		return 0;
 
-ourGrid = Grid("ATCGTAC","ATGTTAT");
-ourGrid.GridShowLCSprocess();
+#ourGrid = Grid("ATCGTAC","ATGTTAT");
+#ourGrid.GridShowLCSprocess();
 	
 #BLOSUM stuff
 vx = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V', 'B', 'Z', 'X', '-'];
@@ -283,7 +262,7 @@ def recBacktrace(v, w, s, x, y, CPath=[[]]):
 	pathList = copy.deepcopy(CPath); #we will append the current position to all paths in this
 	#print("list of paths: ");
 	for path in pathList:
-		path.append([x, y]);		
+		path.append([x, y]);
 	nextPaths = []; #we will append entire paths to this
 	if(x==0 and y==0):
 		return pathList;
@@ -470,6 +449,35 @@ def showLCSprocess(word1, word2):
 def fastLCS(word1, word2):
 	printLCS(dynGrid(word1, word2)[1], " "+word1, len(word1), len(word2));
 
-tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
+def localAlign(y, x):
+	#v and w in local alignment are substrings of v and w. 
+	#alignments will have to be adjusted to reflect their positions in the global edit graph. 
+	#so some other function should be in charge of calling and adjusting the results of this
+	V = [" "]+list(y);
+	W = [" "]+list(x);
+	S = [];
+	B = [];
+	S.append([0]*(len(W)));
+	B.append([" "]*(len(W)));
+	for i in range(len(V)-1):
+		S.append(([0]+[None]*(len(W)-1)));
+		B.append(([" "]+[None]*(len(W)-1)));
+	for i in range(1,len(V)): #horizontal
+		#S[y,x];
+		for j in range(1,len(W)): #vertical
+			if(V[i]==W[j]):
+				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0), (S[i-1][j-1] + 1)); #matches
+			else:
+				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0)); #deletions, insertions
+	ourPaths = recBackTrigger(y, x, S);
+	return (ourPaths);
 
-print(DeltaBLOSUM("W", "W"));
+def alignmentProcess(word1, word2):
+	tinyprintGrid(word1, word2, dynGrid(word1, word2)[0]);
+	localAlign(word1, word2);
+	for path in localAlign(word1, word2):
+		print(path);
+		printAlignment(word1, word2, path);
+
+#tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
+alignmentProcess("ATCGTAC", "ATGTTAT");
