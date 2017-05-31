@@ -315,7 +315,7 @@ def printAlignment(v, w, path):
 	print(" "*4, end="");
 	for i in range(len(path)):
 		print(path[i][1], end=" "*2);
-
+	
 	print("");
 	print("V:", " "*5, sep="", end="");
 
@@ -325,24 +325,50 @@ def printAlignment(v, w, path):
 				print("-", " "*2, sep="", end="");					
 			else:
 				print(V[path[i][1]], " "*2, sep="", end="");
-
+	
 	print("");
 	print("W:", " "*5, sep="", end="");
+	
+	for i in range(len(path)):
+		if(i!=0):	#This is flawed if skips can happen at the first character
+			#print(path[i][0], path[i-1][0], end="");
+			if(path[i][0]==path[i-1][0]): #this indicates a skip.
+				print("-", " "*2, sep="", end="");
+			else:
+				print(W[path[i][0]], " "*2, sep="", end="");
+	
+	print("");
+	print(" "*4, end="");
+	
+	for i in range(len(path)):
+		print(path[i][0], end="  ");
+	print("");
+	return 0;
 
+def shortPrintAlignment(v, w, path):
+	V = [" "]+list(v);
+	W = [" "]+list(w);
+	top = "";
+	middle = "";
+	bottom = "";
+	for i in range(len(path)):
+		if(i!=0):	#This is flawed if skips can happen at the first character
+			if(path[i][1]==path[i-1][1]): #this indicates a skip. 
+				print("-", sep="", end="");					
+			else:
+				print(V[path[i][1]], sep="", end="");
+	
+	print("");
+	
 	for i in range(len(path)):
 		if(i!=0):	#This is flawed if skips can happen at the first character
 			#print(path[i][0], path[i-1][0], end="");
 			if(path[i][0]==path[i-1][0]): #this indicates a skip. 
-				print("-", " "*2, sep="", end="");
+				print("-", sep="", end="");
 			else:
-				print(W[path[i][0]], " "*2, sep="", end="");	
-
+				print(W[path[i][0]], sep="", end="");
 	print("");
-	print(" "*4, end="");
-
-	for i in range(len(path)):
-		print(path[i][0], end="  ");
-	print("");
+	return 0;
 
 def tinyprintGrid(v, w, s):
 	V = [" "]+list(v);
@@ -479,6 +505,41 @@ def fastLCS(word1, word2):
 	printLCS(dynGrid(word1, word2)[1], " "+word1, len(word1), len(word2));
 
 def localAlign(y, x):
+	V = ["-"]+list(y);
+	W = ["-"]+list(x);
+	S = [];
+	B = [];
+	S.append([0]*(len(W)));
+	B.append(([" "]+["-"]*(len(W)-1)));
+	for i in range(len(V)-1):
+		S.append(([0]+[None]*(len(W)-1)));
+		B.append((["|"]+[None]*(len(W)-1)));
+	for i in range(1,len(V)): #horizontal
+		#S[y,x];
+		for j in range(1,len(W)): #vertical
+			S[i][j] = max((S[i-1][j]+ DeltaBLOSUM(V[i], W[j])), (S[i][j-1] + DeltaBLOSUM(V[i], W[j])), (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))); #matches
+			if(S[i][j] == S[i-1][j] + DeltaBLOSUM(V[i], W[j])):
+				B[i][j] = "|";
+			elif(S[i][j] == S[i][j-1] + DeltaBLOSUM(V[i], W[j])):
+				B[i][j] = "-";
+			elif(S[i][j] == S[i-1][j-1]+ DeltaBLOSUM(V[i], W[j])):
+				B[i][j] = ('\\');
+			else:
+				print("error: cannot determine backtracing direction");
+	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
+	ourPaths.reverse();
+	dirPath = [];
+	print(ourPaths[-1]);
+	print(len(y), len(x), len(B), len(B[0]), len(B[-1]));
+	for point in ourPaths:
+		print(point);
+		print(B[point[1]][point[0]]);
+		#print(point[1], point[0]);
+		#dirPath.append(B[point[0]][point[1]]);
+	print(dirPath);
+	return (S, ourPaths);	
+
+def affineGap(y, x):
 	#v and w in local alignment are substrings of v and w. 
 	#alignments will have to be adjusted to reflect their positions in the global edit graph. 
 	#so some other function should be in charge of calling and adjusting the results of this
@@ -526,8 +587,12 @@ def localAlign(y, x):
 	return (S, ourPaths);
 
 def alignmentProcess(word1, word2):
-	tinyprintGrid(word1, word2, localAlign(word1, word2)[0]);
-	printAlignment(word1, word2, localAlign(word1, word2)[1]);
+	local = localAlign(word1, word2);
+	gap = affineGap(word1, word2);
+	#for row in local[1]:
+		#print(row, "\t", word1[row[1]], word2[row[0]]);
+	#tinyprintGrid(word1, word2, affineGap(word1, word2)[0]);
+	shortPrintAlignment(word1, word2, local[1]);
 #tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
 #alignmentProcess("ATCGTAC", "ATGTTAT");
 alignmentProcess("EEEEEKKKKKAAAAAFFF", "EEEEEBBBBBFFF");
