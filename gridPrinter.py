@@ -456,26 +456,37 @@ def localAlign(y, x):
 	V = [" "]+list(y);
 	W = [" "]+list(x);
 	S = [];
-	B = [];
+	L = [];
+	U = [];
+	a = 1;
+	p = 11;
 	S.append([0]*(len(W)));
-	B.append([" "]*(len(W)));
+	L.append([0]*(len(W)));
+	U.append([0]*(len(W)));
 	for i in range(len(V)-1):
 		S.append(([0]+[None]*(len(W)-1)));
-		B.append(([" "]+[None]*(len(W)-1)));
+		L.append(([0]+[None]*(len(W)-1)));
+		U.append(([0]+[None]*(len(W)-1)));
 	for i in range(1,len(V)): #horizontal
 		#S[y,x];
 		for j in range(1,len(W)): #vertical
-			if(V[i]==W[j]):
-				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0), (S[i-1][j-1] + 1)); #matches
-			else:
-				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0)); #deletions, insertions
+			#lower level. horizontal edges		gaps in w
+			L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
+			#upper level. vertical edges		gaps in v
+			U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
+			#main level. diagonal edges			matches/mismatches
+			S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
 	ourPaths = recBackTrigger(y, x, S);
-	return (ourPaths);
+	#print(y, x, S);
+	#print(recBackTrigger(y, x, S));
+	return (S, ourPaths);
 
 def alignmentProcess(word1, word2):
-	tinyprintGrid(word1, word2, dynGrid(word1, word2)[0]);
+	tinyprintGrid(word1, word2, localAlign(word1, word2)[0]);
 	localAlign(word1, word2);
-	for path in localAlign(word1, word2):
+	print(localAlign(word1, word2)[1]);
+	stuff = localAlign(word1, word2)[1];
+	for path in stuff:
 		print(path);
 		printAlignment(word1, word2, path);
 
