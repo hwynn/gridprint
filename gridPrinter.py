@@ -280,6 +280,34 @@ def recBacktrace(v, w, s, x, y, CPath=[[]]):
 		if(V[y]==W[x]):
 			nextPaths = copy.deepcopy(nextPaths) + copy.deepcopy(recBacktrace(v, w, s, x-1, y-1, pathList));
 	return copy.deepcopy(nextPaths);
+
+def bRecBacktrace(s, v, w, b, x, y, CPath=[]):
+	#print("Hello:", x, y, b[y][x], s[y][x]);
+	V = [" "]+list(v);
+	W = [" "]+list(w);
+	#make new list to put our old list into (copies if needed)
+	pathList = copy.deepcopy(CPath); #we will append the current position to all paths in this
+	#print("list of paths: ");
+	pathList.append([x, y]);
+	
+	if(x==0 and y==0):
+		return pathList;
+	if(x==0):
+		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x, y-1, pathList));
+	if(y==0):
+		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y, pathList));
+	#s[y,x]
+	nextPaths=[];
+	#did we come from above?
+	if(b[y][x] == "|"):
+		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x, y-1, pathList));
+	#did we come from the left?
+	if(b[y][x] == "-"):
+		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y, pathList));		
+	#did we come diagonally?
+	if(b[y][x] == "\\"):
+		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y-1, pathList));
+	return copy.deepcopy(pathList);
 	
 def printAlignment(v, w, path):
 	V = [" "]+list(v);
@@ -287,7 +315,7 @@ def printAlignment(v, w, path):
 	print(" "*4, end="");
 	for i in range(len(path)):
 		print(path[i][1], end=" "*2);
-				
+
 	print("");
 	print("V:", " "*5, sep="", end="");
 
@@ -297,7 +325,7 @@ def printAlignment(v, w, path):
 				print("-", " "*2, sep="", end="");					
 			else:
 				print(V[path[i][1]], " "*2, sep="", end="");
-	
+
 	print("");
 	print("W:", " "*5, sep="", end="");
 
@@ -459,44 +487,47 @@ def localAlign(y, x):
 	S = [];
 	L = [];
 	U = [];
+	B = [];
 	a = 1;
 	p = 11;
 	S.append([0]*(len(W)));
 	L.append([0]*(len(W)));
 	U.append([0]*(len(W)));
+	B.append([" "]*(len(W)));
 	for i in range(len(V)-1):
 		S.append(([0]+[None]*(len(W)-1)));
 		L.append(([0]+[None]*(len(W)-1)));
 		U.append(([0]+[None]*(len(W)-1)));
+		B.append(([" "]+[None]*(len(W)-1)));
 	for i in range(1,len(V)): #horizontal
 		#S[y,x];
 		for j in range(1,len(W)): #vertical
 			#lower level. horizontal edges		gaps in w
 			L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
+			#print("- gap:", "continue gap w:", (L[i-1][j] - a), "start gap from middle:" , (S[i-1][j]-(p+a)));
 			#upper level. vertical edges		gaps in v
 			U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
+			#print("| gap:", "continue gap v:", (U[i][j-1] - a), "start gap from middle:" , (S[i][j-1]-(p+a)));
 			#main level. diagonal edges			matches/mismatches
 			S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
+			#print("main:", i, j, "\tmatch:", (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), "\tgap w:", L[i][j], "\tgap v:" , U[i][j]);
 			#note: There could be instances in which one path is equal to another. This is what recBacktrace() is for. 
 			#but the extra layers make finding all possible paths too complex for the moment. This possibility can be revisited.
 			#This would be a good place to test if multiple paths occur, if we want to explore that option.
-	
-	ourPaths = recBacktrace(y, x, S,len(x),len(y));
-	for z in ourPaths:
-		z.reverse();
-	
-	#print(y, x, ourPaths);
-	print(recBackTrigger(y, x, S));
+			if(S[i][j] == L[i][j]):
+				B[i][j] = "-";
+			if(S[i][j] == U[i][j]):
+				B[i][j] = "|";
+			if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
+				B[i][j] = "\\";
+	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
+	ourPaths.reverse();
+
 	return (S, ourPaths);
 
 def alignmentProcess(word1, word2):
 	tinyprintGrid(word1, word2, localAlign(word1, word2)[0]);
-	localAlign(word1, word2);
-	print(localAlign(word1, word2)[1]);
-	stuff = localAlign(word1, word2)[1];
-	for path in stuff:
-		print(path);
-		printAlignment(word1, word2, path);
-
+	printAlignment(word1, word2, localAlign(word1, word2)[1]);
 #tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
-alignmentProcess("ATCGTAC", "ATGTTAT");
+#alignmentProcess("ATCGTAC", "ATGTTAT");
+alignmentProcess("EEEEEKKKKKAAAAAFFF", "EEEEEBBBBBFFF");
