@@ -323,9 +323,9 @@ def tinyprintGrid(v, w, s):
 	for j in range(len(W)-1):
 		#print W
 		if(j==0):
-			print("W", " "*5, sep="", end="");
+			print("W", " "*7, sep="", end="");
 		else:
-			print(W[j], " "*5, sep="", end="");
+			print(W[j], " "*7, sep="", end="");
 	print(W[-1]);
 	print("");
 	for i in range(len(V)-1):
@@ -336,21 +336,22 @@ def tinyprintGrid(v, w, s):
 			print(V[i], " "*2, sep="", end="");
 		#print row
 		for j in range(len(W)-1):
-			print("[", str(s[i][j]), "]", "---", sep="", end="");
-		print("[", s[i][-1], "]",sep="");
+			('[{n}]'.format(n=str(s[i][j]).center(3," ")));
+			print("[", str(s[i][j]).center(3," "), "]", "---", sep="", end="");
+		print("[", str(s[i][-1]).center(3," "), "]",sep="");
 		#print down
-		print(" "*3," "*1, sep="", end="");
+		print(" "*4," "*1, sep="", end="");
 		for j in range(len(W)-1):
 			if(W[j+1]==V[i+1]):
-				print('|', " "*2,"\\"," "*2, sep="", end="");
+				print('|', " "*3,"\\"," "*3, sep="", end="");
 			else:
-				print('|', " "*5, sep="", end="");
+				print('|', " "*7, sep="", end="");
 		print('|');
 	#print last row
 	print(V[-1], " "*2, sep="", end="");
 	for j in range(len(W)-1):
-		print("[", str(s[len(V)-1][j]), "]", "---", sep="", end="");
-	print("[", s[len(V)-1][-1], "]",sep="");
+		print("[", str(s[len(V)-1][j]).center(3," "), "]", "---", sep="", end="");
+	print("[", str(s[len(V)-1][-1]).center(3," "), "]",sep="");
 
 def quickGrid(y, x):
 	V=[" "]+list(y);
