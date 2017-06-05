@@ -394,13 +394,13 @@ def shortPrintAlignment(v, w, path):
 def tinyprintGrid(v, w, s):
 	V = [" "]+list(v);
 	W = [" "]+list(w);
-	print(" "*4, end="");
+	print(" "*5, end="");
 	for j in range(len(W)-1):
 		#print W
 		if(j==0):
-			print("W", " "*7, sep="", end="");
+			print("W", " "*4, sep="", end="");
 		else:
-			print(W[j], " "*7, sep="", end="");
+			print(W[j], " "*4, sep="", end="");
 	print(W[-1]);
 	print("");
 	for i in range(len(V)-1):
@@ -412,21 +412,21 @@ def tinyprintGrid(v, w, s):
 		#print row
 		for j in range(len(W)-1):
 			('[{n}]'.format(n=str(s[i][j]).center(3," ")));
-			print("[", str(s[i][j]).center(3," "), "]", "---", sep="", end="");
-		print("[", str(s[i][-1]).center(3," "), "]",sep="");
+			print("=", str(s[i][j]).center(3," "), "=", sep="", end="");
+		print("=", str(s[i][-1]).center(3," "), "=",sep="");
 		#print down
 		print(" "*4," "*1, sep="", end="");
 		for j in range(len(W)-1):
 			if(W[j+1]==V[i+1]):
-				print('|', " "*3,"\\"," "*3, sep="", end="");
+				print('|', " ","\\"," "*2, sep="", end="");
 			else:
-				print('|', " "*7, sep="", end="");
+				print('|', " "*4, sep="", end="");
 		print('|');
 	#print last row
 	print(V[-1], " "*2, sep="", end="");
 	for j in range(len(W)-1):
-		print("[", str(s[len(V)-1][j]).center(3," "), "]", "---", sep="", end="");
-	print("[", str(s[len(V)-1][-1]).center(3," "), "]",sep="");
+		print("=", str(s[len(V)-1][j]).center(3," "), "=", sep="", end="");
+	print("=", str(s[len(V)-1][-1]).center(3," "), "=",sep="");
 
 def quickGrid(y, x):
 	V=[" "]+list(y);
@@ -525,7 +525,7 @@ def showLCSprocess(word1, word2):
 def fastLCS(word1, word2):
 	printLCS(dynGrid(word1, word2)[1], " "+word1, len(word1), len(word2));
 
-def localAlign(y, x):
+def smithWatermanAlign(y, x): #smith
 	V = ["-"]+list(y);
 	W = ["-"]+list(x);
 	S = [];
@@ -538,15 +538,15 @@ def localAlign(y, x):
 	for i in range(1,len(V)): #horizontal
 		#S[y,x];
 		for j in range(1,len(W)): #vertical
-			S[i][j] = max((S[i-1][j]+ DeltaBLOSUM(V[i], W[j])), (S[i][j-1] + DeltaBLOSUM(V[i], W[j])), (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))); #matches
-			if(S[i][j] == S[i-1][j] + DeltaBLOSUM(V[i], W[j])):
+			S[i][j] = max((S[i-1][j]+ DeltaBLOSUM(V[i], W[0])), (S[i][j-1] + DeltaBLOSUM(V[0], W[j])), (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))); #matches
+			if(S[i][j] == S[i-1][j] + DeltaBLOSUM(V[i], W[0])):
 				B[i][j] = "|";
-			elif(S[i][j] == S[i][j-1] + DeltaBLOSUM(V[i], W[j])):
+			elif(S[i][j] == S[i][j-1] + DeltaBLOSUM(V[0], W[j])):
 				B[i][j] = "-";
 			elif(S[i][j] == S[i-1][j-1]+ DeltaBLOSUM(V[i], W[j])):
 				B[i][j] = ('\\');
 			else:
-				print("error: cannot determine backtracing direction");
+				print("error: cannot determine backtracing direction at B[",i, "][", j, "]  ", S[i][j], sep="");
 	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
 	ourPaths.reverse();
 	dirPath = [];
@@ -571,12 +571,12 @@ def affineGap(y, x):
 	S.append([0]*(len(W)));
 	L.append([0]*(len(W)));
 	U.append([0]*(len(W)));
-	B.append([" "]*(len(W)));
+	B.append(([" "]+["-"]*(len(W)-1)));
 	for i in range(len(V)-1):
 		S.append(([0]+[None]*(len(W)-1)));
 		L.append(([0]+[None]*(len(W)-1)));
 		U.append(([0]+[None]*(len(W)-1)));
-		B.append(([" "]+[None]*(len(W)-1)));
+		B.append((["|"]+[None]*(len(W)-1)));
 	for i in range(1,len(V)): #horizontal
 		#S[y,x];
 		for j in range(1,len(W)): #vertical
@@ -604,12 +604,15 @@ def affineGap(y, x):
 	return (S, ourPaths);
 
 def alignmentProcess(word1, word2):
-	local = localAlign(word1, word2);
-	#gap = affineGap(word1, word2);
-	#for row in local[1]:
+	smLocal = smithWatermanAlign(word1, word2);
+	gap = affineGap(word1, word2);
+	#for row in smLocal[1]:
 		#print(row, "\t", word1[row[1]], word2[row[0]]);
-	#tinyprintGrid(word1, word2, affineGap(word1, word2)[0]);
-	shortPrintAlignment(word1, word2, local[1]);
+	tinyprintGrid(word1, word2, smLocal[0]);
+	tinyprintGrid(word1, word2, gap[0]);
+	print(gap[1]);
+	shortPrintAlignment(word1, word2, smLocal[1]);
+	shortPrintAlignment(word1, word2, gap[1]);
 #tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
 alignmentProcess("ATCGTAC", "ATGTTAT");
 #alignmentProcess("EEEEEKKKKKAAAAAFFF", "EEEEEBBBBBFFF");
