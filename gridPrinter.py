@@ -282,23 +282,13 @@ def recBacktrace(v, w, s, x, y, CPath=[[]]):
 	return copy.deepcopy(nextPaths);
 
 def bRecBacktrace(s, v, w, b, x, y, CPath=[]):
-	#print("Hello:", x, y, b[y][x], s[y][x]);
 	V = [" "]+list(v);
 	W = [" "]+list(w);
-	#make new list to put our old list into (copies if needed)
-	pathList = copy.deepcopy(CPath); #we will append the current position to all paths in this
-	#print("list of paths: ");
-	if(x==0 or y==0):
-		print(x,y, pathList[-1], b[y][x]);
-	if(len(pathList)!=0):
-		if(pathList[-1] == [0,0]):
-			print("problem");
+	pathList = copy.deepcopy(CPath); #we will append the current position to this
 	pathList.append([x, y]);
 	if(x==0 and y==0):
-		print("end");
 		return pathList;
 	#s[y,x]
-	nextPaths=[];
 	#did we come from above?
 	if(b[y][x] == "|"):
 		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x, y-1, pathList));
@@ -347,27 +337,57 @@ def printAlignment(v, w, path):
 	return 0;
 
 def shortPrintAlignment(v, w, path):
-	V = [" "]+list(v);
-	W = [" "]+list(w);
-	top = "";
-	middle = "";
-	bottom = "";
-	for i in range(len(path)):
-		if(i!=0):	#This is flawed if skips can happen at the first character
-			if(path[i][1]==path[i-1][1]): #this indicates a skip. 
-				print("-", sep="", end="");					
+	V = ["-"]+list(v);
+	W = ["-"]+list(w);
+	top = ""; #W
+	middle = ""; #relationship
+	bottom = ""; #V
+	#if match, use |
+	#if mismatch, use *
+	#if gap, use " "
+	#path[0] = [wj, vi]
+	if(path[1] == [0,1]): #moved down. gap in W
+		top = top + "-";
+		middle = middle + " ";
+		bottom = bottom + V[path[0][1]];
+	elif(path[1] == [1,0]): #moved left, gap in V
+		top = top + W[path[0][0]];
+		middle = middle + " ";
+		bottom = bottom + "-";
+	else: #(path[1] == [1,1]) #moved diagonal, match or mismatch
+		top = top + W[path[0][0]];
+		if(W[path[0][0]]==V[path[0][1]]):
+			middle = middle + "|";
+		else:
+			middle = middle + "*";
+		bottom = bottom + V[path[0][1]];
+		
+	for i in range(1,len(path)):
+		if(i%10 == 0):
+			print(top, middle, bottom, sep="\n");
+			top = "";
+			middle = "";
+			bottom = "";
+			print("");
+		
+		if(path[i][0]==path[i-1][0]): #we didn't move left.
+			top = top + "-";
+			middle = middle + " ";
+			bottom = bottom + V[path[i][1]];
+		elif(path[i][1]==path[i-1][1]): #we didn't move down
+			top = top + W[path[i][0]];
+			middle = middle + " ";
+			bottom = bottom + "-";
+		else: #we moved diagonally
+			top = top + W[path[i][0]];
+			if(W[path[i][0]]==V[path[i][1]]):
+				middle = middle + "|";
 			else:
-				print(V[path[i][1]], sep="", end="");
-	
-	print("");
-	
-	for i in range(len(path)):
-		if(i!=0):	#This is flawed if skips can happen at the first character
-			#print(path[i][0], path[i-1][0], end="");
-			if(path[i][0]==path[i-1][0]): #this indicates a skip. 
-				print("-", sep="", end="");
-			else:
-				print(W[path[i][0]], sep="", end="");
+				middle = middle + "*";
+			bottom = bottom + V[path[i][1]];
+		if(i == len(path)-1):
+			print(top, middle, bottom, sep="\n");
+
 	print("");
 	return 0;
 
@@ -530,15 +550,11 @@ def localAlign(y, x):
 	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
 	ourPaths.reverse();
 	dirPath = [];
-	print(ourPaths[-1]);
 	#print(len(y), len(x), len(B), len(B[0]), len(B[-1]));
 	for point in ourPaths:
-		print(point);
-		print(B[point[1]][point[0]]);
 		#print(point[1], point[0]);
-		#dirPath.append(B[point[0]][point[1]]);
-	#print(dirPath);
-	return (S, ourPaths);	
+		dirPath.append(B[point[1]][point[0]]);
+	return (S, ourPaths, dirPath);	
 
 def affineGap(y, x):
 	#v and w in local alignment are substrings of v and w. 
@@ -595,5 +611,5 @@ def alignmentProcess(word1, word2):
 	#tinyprintGrid(word1, word2, affineGap(word1, word2)[0]);
 	shortPrintAlignment(word1, word2, local[1]);
 #tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
-#alignmentProcess("ATCGTAC", "ATGTTAT");
-alignmentProcess("EEEEEKKKKKAAAAAFFF", "EEEEEBBBBBFFF");
+alignmentProcess("ATCGTAC", "ATGTTAT");
+#alignmentProcess("EEEEEKKKKKAAAAAFFF", "EEEEEBBBBBFFF");
