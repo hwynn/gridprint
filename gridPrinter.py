@@ -288,14 +288,15 @@ def bRecBacktrace(s, v, w, b, x, y, CPath=[]):
 	#make new list to put our old list into (copies if needed)
 	pathList = copy.deepcopy(CPath); #we will append the current position to all paths in this
 	#print("list of paths: ");
+	if(x==0 or y==0):
+		print(x,y, pathList[-1], b[y][x]);
+	if(len(pathList)!=0):
+		if(pathList[-1] == [0,0]):
+			print("problem");
 	pathList.append([x, y]);
-	
 	if(x==0 and y==0):
+		print("end");
 		return pathList;
-	if(x==0):
-		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x, y-1, pathList));
-	if(y==0):
-		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y, pathList));
 	#s[y,x]
 	nextPaths=[];
 	#did we come from above?
@@ -530,13 +531,13 @@ def localAlign(y, x):
 	ourPaths.reverse();
 	dirPath = [];
 	print(ourPaths[-1]);
-	print(len(y), len(x), len(B), len(B[0]), len(B[-1]));
+	#print(len(y), len(x), len(B), len(B[0]), len(B[-1]));
 	for point in ourPaths:
 		print(point);
 		print(B[point[1]][point[0]]);
 		#print(point[1], point[0]);
 		#dirPath.append(B[point[0]][point[1]]);
-	print(dirPath);
+	#print(dirPath);
 	return (S, ourPaths);	
 
 def affineGap(y, x):
@@ -588,7 +589,7 @@ def affineGap(y, x):
 
 def alignmentProcess(word1, word2):
 	local = localAlign(word1, word2);
-	gap = affineGap(word1, word2);
+	#gap = affineGap(word1, word2);
 	#for row in local[1]:
 		#print(row, "\t", word1[row[1]], word2[row[0]]);
 	#tinyprintGrid(word1, word2, affineGap(word1, word2)[0]);
