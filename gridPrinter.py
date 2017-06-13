@@ -603,6 +603,34 @@ def affineGap(y, x):
 
 	return (S, ourPaths);
 
+def banding(word1, word2):
+	#k is constant. we'll make it 3 for no particular reason.
+	k = 1;
+	N = len(word1);
+	#d is another constant chosen arbitrarily
+	d = 2;
+	#F = ([([None]*(len(word1)+1))]*(len(word2)+1));
+	#this caused a problem that was solved here: https://stackoverflow.com/questions/9459337/assign-value-to-an-individual-cell-in-a-two-dimensional-python-array
+
+	F =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ]
+	S = dynGrid(word1, word2)[0];
+	for i in range(k+1):
+		F[i][0] = 0; #I have no idea what number these should be initialized to
+	for j in range(k+1):
+		F[0][j] = 0; #I have no idea what number these should be initialized to
+	for i in range(1,N+1):
+		for j in range(max(1,i-k),min(N,i+k)+1):
+			if((i-j)>k):
+				F[i][j] = max((F[i][j-1]-d),(F[i-1][j-1] + S[i][j]));
+			elif((j-i)>k):
+				F[i][j] = max((F[i-1][j]-d),(F[i-1][j-1] + S[i][j]));
+			else:
+				F[i][j] = (F[i-1][j-1] + S[i][j]);
+	tinyprintGrid(word1, word2, S);
+	for i in F:
+		print(i);
+	return (S, F);
+	
 def alignmentProcess(word1, word2):
 	smLocal = smithWatermanAlign(word1, word2);
 	gap = affineGap(word1, word2);
@@ -614,5 +642,7 @@ def alignmentProcess(word1, word2):
 	shortPrintAlignment(word1, word2, smLocal[1]);
 	shortPrintAlignment(word1, word2, gap[1]);
 #tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
-alignmentProcess("ATCGTAC", "ATGTTAT");
+#alignmentProcess("ATCGTAC", "ATGTTAT");
 #alignmentProcess("EEEEEKKKKKAAAAAFFF", "EEEEEBBBBBFFF");
+
+banding("ATCGTAC", "ATGTTAT");
