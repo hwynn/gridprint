@@ -249,6 +249,8 @@ def DeltaBLOSUM(vi, wj):
 	return Bindex[vx.index(vi)][vx.index(wj)];
 	#this could use some error checking
 
+#----recursive traceback algorithms-------------
+	
 def recBackTrigger(v, w, s):
 	myList = recBacktrace(v, w, s,len(w),len(v));
 	for x in myList:
@@ -299,7 +301,170 @@ def bRecBacktrace(s, v, w, b, x, y, CPath=[]):
 	if(b[y][x] == "\\"):
 		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y-1, pathList));
 	return copy.deepcopy(pathList);
-	
+
+#----grid navigating algorithms-----------------------
+
+def quickGrid(y, x):
+	V=[" "]+list(y);
+	W=[" "]+list(x);
+	S = [];
+	B = [];
+	S.append([0]*(len(W)));
+	B.append([" "]*(len(W)));
+	for i in range(len(V)-1):
+		S.append(([0]+[None]*(len(W)-1)));
+		B.append(([" "]+[None]*(len(W)-1)));
+	for i in range(1,len(V)): #horizontal
+		for j in range(1,len(W)): #vertical
+			if(V[i]==W[j]):
+				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0), (S[i-1][j-1] + 1)); #matches
+			else:
+				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0)); #deletions, insertions
+			if(S[i][j] == S[i-1][j]):
+				B[i][j] = "|";
+			elif(S[i][j] == S[i][j-1]):
+				B[i][j] = "-";
+			elif(S[i][j] == S[i-1][j-1]+1):
+				B[i][j] = ('\\');
+			else:
+				print("error: cannot determine backtracing direction");
+	return (S[len(y)][len(x)], B);
+
+def dynGrid(y, x):
+	V = [" "]+list(y);
+	W = [" "]+list(x);
+	S = [];
+	B = [];
+	S.append([0]*(len(W)));
+	B.append([" "]*(len(W)));
+	for i in range(len(V)-1):
+		S.append(([0]+[None]*(len(W)-1)));
+		B.append(([" "]+[None]*(len(W)-1)));
+	for i in range(1,len(V)): #horizontal
+		#S[y,x];
+		for j in range(1,len(W)): #vertical
+			if(V[i]==W[j]):
+				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0), (S[i-1][j-1] + 1)); #matches
+			else:
+				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0)); #deletions, insertions
+			if(S[i][j] == S[i-1][j]):
+				B[i][j] = "|";
+			elif(S[i][j] == S[i][j-1]):
+				B[i][j] = "-";
+			elif(S[i][j] == S[i-1][j-1]+1):
+				B[i][j] = ('\\');
+			else:
+				print("error: cannot determine backtracing direction");
+	return (S, B);
+
+def smithWatermanAlign(y, x): #smith
+	V = ["-"]+list(y);
+	W = ["-"]+list(x);
+	S = [];
+	B = [];
+	S.append([0]*(len(W)));
+	B.append(([" "]+["-"]*(len(W)-1)));
+	for i in range(len(V)-1):
+		S.append(([0]+[None]*(len(W)-1)));
+		B.append((["|"]+[None]*(len(W)-1)));
+	for i in range(1,len(V)): #horizontal
+		#S[y,x];
+		for j in range(1,len(W)): #vertical
+			S[i][j] = max((S[i-1][j]+ DeltaBLOSUM(V[i], W[0])), (S[i][j-1] + DeltaBLOSUM(V[0], W[j])), (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))); #matches
+			if(S[i][j] == S[i-1][j] + DeltaBLOSUM(V[i], W[0])):
+				B[i][j] = "|";
+			elif(S[i][j] == S[i][j-1] + DeltaBLOSUM(V[0], W[j])):
+				B[i][j] = "-";
+			elif(S[i][j] == S[i-1][j-1]+ DeltaBLOSUM(V[i], W[j])):
+				B[i][j] = ('\\');
+			else:
+				print("error: cannot determine backtracing direction at B[",i, "][", j, "]  ", S[i][j], sep="");
+	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
+	ourPaths.reverse();
+	dirPath = [];
+	#print(len(y), len(x), len(B), len(B[0]), len(B[-1]));
+	for point in ourPaths:
+		#print(point[1], point[0]);
+		dirPath.append(B[point[1]][point[0]]);
+	return (S, ourPaths, dirPath);	
+
+def affineGap(y, x):
+	#v and w in local alignment are substrings of v and w. 
+	#alignments will have to be adjusted to reflect their positions in the global edit graph. 
+	#so some other function should be in charge of calling and adjusting the results of this
+	V = [" "]+list(y);
+	W = [" "]+list(x);
+	S = [];
+	L = [];
+	U = [];
+	B = [];
+	a = 1;
+	p = 11;
+	S.append([0]*(len(W)));
+	L.append([0]*(len(W)));
+	U.append([0]*(len(W)));
+	B.append(([" "]+["-"]*(len(W)-1)));
+	for i in range(len(V)-1):
+		S.append(([0]+[None]*(len(W)-1)));
+		L.append(([0]+[None]*(len(W)-1)));
+		U.append(([0]+[None]*(len(W)-1)));
+		B.append((["|"]+[None]*(len(W)-1)));
+	for i in range(1,len(V)): #horizontal
+		#S[y,x];
+		for j in range(1,len(W)): #vertical
+			#lower level. horizontal edges		gaps in w
+			L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
+			#print("- gap:", "continue gap w:", (L[i-1][j] - a), "start gap from middle:" , (S[i-1][j]-(p+a)));
+			#upper level. vertical edges		gaps in v
+			U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
+			#print("| gap:", "continue gap v:", (U[i][j-1] - a), "start gap from middle:" , (S[i][j-1]-(p+a)));
+			#main level. diagonal edges			matches/mismatches
+			S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
+			#print("main:", i, j, "\tmatch:", (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), "\tgap w:", L[i][j], "\tgap v:" , U[i][j]);
+			#note: There could be instances in which one path is equal to another. This is what recBacktrace() is for. 
+			#but the extra layers make finding all possible paths too complex for the moment. This possibility can be revisited.
+			#This would be a good place to test if multiple paths occur, if we want to explore that option.
+			if(S[i][j] == L[i][j]):
+				B[i][j] = "-";
+			if(S[i][j] == U[i][j]):
+				B[i][j] = "|";
+			if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
+				B[i][j] = "\\";
+	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
+	ourPaths.reverse();
+
+	return (S, ourPaths);
+
+def banding(word1, word2):
+	#k is constant. we'll make it 3 for no particular reason.
+	k = 1;
+	N = len(word1);
+	#d is another constant chosen arbitrarily
+	d = 2;
+	#F = ([([None]*(len(word1)+1))]*(len(word2)+1));
+	#this caused a problem that was solved here: https://stackoverflow.com/questions/9459337/assign-value-to-an-individual-cell-in-a-two-dimensional-python-array
+
+	F =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ]
+	S = dynGrid(word1, word2)[0];
+	for i in range(k+1):
+		F[i][0] = 0; #I have no idea what number these should be initialized to
+	for j in range(k+1):
+		F[0][j] = 0; #I have no idea what number these should be initialized to
+	for i in range(1,N+1):
+		for j in range(max(1,i-k),min(N,i+k)+1):
+			if((i-j)>k):
+				F[i][j] = max((F[i][j-1]-d),(F[i-1][j-1] + S[i][j]));
+			elif((j-i)>k):
+				F[i][j] = max((F[i-1][j]-d),(F[i-1][j-1] + S[i][j]));
+			else:
+				F[i][j] = (F[i-1][j-1] + S[i][j]);
+	tinyprintGrid(word1, word2, S);
+	for i in F:
+		print(i);
+	return (S, F);
+
+#---printing/displaying functions--------------------
+
 def printAlignment(v, w, path):
 	V = [" "]+list(v);
 	W = [" "]+list(w);
@@ -428,59 +593,6 @@ def tinyprintGrid(v, w, s):
 		print("=", str(s[len(V)-1][j]).center(3," "), "=", sep="", end="");
 	print("=", str(s[len(V)-1][-1]).center(3," "), "=",sep="");
 
-def quickGrid(y, x):
-	V=[" "]+list(y);
-	W=[" "]+list(x);
-	S = [];
-	B = [];
-	S.append([0]*(len(W)));
-	B.append([" "]*(len(W)));
-	for i in range(len(V)-1):
-		S.append(([0]+[None]*(len(W)-1)));
-		B.append(([" "]+[None]*(len(W)-1)));
-	for i in range(1,len(V)): #horizontal
-		for j in range(1,len(W)): #vertical
-			if(V[i]==W[j]):
-				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0), (S[i-1][j-1] + 1)); #matches
-			else:
-				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0)); #deletions, insertions
-			if(S[i][j] == S[i-1][j]):
-				B[i][j] = "|";
-			elif(S[i][j] == S[i][j-1]):
-				B[i][j] = "-";
-			elif(S[i][j] == S[i-1][j-1]+1):
-				B[i][j] = ('\\');
-			else:
-				print("error: cannot determine backtracing direction");
-	return (S[len(y)][len(x)], B);
-
-def dynGrid(y, x):
-	V = [" "]+list(y);
-	W = [" "]+list(x);
-	S = [];
-	B = [];
-	S.append([0]*(len(W)));
-	B.append([" "]*(len(W)));
-	for i in range(len(V)-1):
-		S.append(([0]+[None]*(len(W)-1)));
-		B.append(([" "]+[None]*(len(W)-1)));
-	for i in range(1,len(V)): #horizontal
-		#S[y,x];
-		for j in range(1,len(W)): #vertical
-			if(V[i]==W[j]):
-				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0), (S[i-1][j-1] + 1)); #matches
-			else:
-				S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0)); #deletions, insertions
-			if(S[i][j] == S[i-1][j]):
-				B[i][j] = "|";
-			elif(S[i][j] == S[i][j-1]):
-				B[i][j] = "-";
-			elif(S[i][j] == S[i-1][j-1]+1):
-				B[i][j] = ('\\');
-			else:
-				print("error: cannot determine backtracing direction");
-	return (S, B);
-
 def printLCS(b, V, i, j):
 	if(i==0 or j==0):
 		return;
@@ -491,6 +603,11 @@ def printLCS(b, V, i, j):
 		printLCS(b, V, i-1, j);
 	else:
 		printLCS(b, V, i, j-1);
+
+#----operation running functions-----------
+		
+def fastLCS(word1, word2):
+	printLCS(dynGrid(word1, word2)[1], " "+word1, len(word1), len(word2));
 
 def showLCSprocess(word1, word2):
 	print("-"*20);
@@ -521,115 +638,6 @@ def showLCSprocess(word1, word2):
 	print("");
 
 	return 0;
-
-def fastLCS(word1, word2):
-	printLCS(dynGrid(word1, word2)[1], " "+word1, len(word1), len(word2));
-
-def smithWatermanAlign(y, x): #smith
-	V = ["-"]+list(y);
-	W = ["-"]+list(x);
-	S = [];
-	B = [];
-	S.append([0]*(len(W)));
-	B.append(([" "]+["-"]*(len(W)-1)));
-	for i in range(len(V)-1):
-		S.append(([0]+[None]*(len(W)-1)));
-		B.append((["|"]+[None]*(len(W)-1)));
-	for i in range(1,len(V)): #horizontal
-		#S[y,x];
-		for j in range(1,len(W)): #vertical
-			S[i][j] = max((S[i-1][j]+ DeltaBLOSUM(V[i], W[0])), (S[i][j-1] + DeltaBLOSUM(V[0], W[j])), (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))); #matches
-			if(S[i][j] == S[i-1][j] + DeltaBLOSUM(V[i], W[0])):
-				B[i][j] = "|";
-			elif(S[i][j] == S[i][j-1] + DeltaBLOSUM(V[0], W[j])):
-				B[i][j] = "-";
-			elif(S[i][j] == S[i-1][j-1]+ DeltaBLOSUM(V[i], W[j])):
-				B[i][j] = ('\\');
-			else:
-				print("error: cannot determine backtracing direction at B[",i, "][", j, "]  ", S[i][j], sep="");
-	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
-	ourPaths.reverse();
-	dirPath = [];
-	#print(len(y), len(x), len(B), len(B[0]), len(B[-1]));
-	for point in ourPaths:
-		#print(point[1], point[0]);
-		dirPath.append(B[point[1]][point[0]]);
-	return (S, ourPaths, dirPath);	
-
-def affineGap(y, x):
-	#v and w in local alignment are substrings of v and w. 
-	#alignments will have to be adjusted to reflect their positions in the global edit graph. 
-	#so some other function should be in charge of calling and adjusting the results of this
-	V = [" "]+list(y);
-	W = [" "]+list(x);
-	S = [];
-	L = [];
-	U = [];
-	B = [];
-	a = 1;
-	p = 11;
-	S.append([0]*(len(W)));
-	L.append([0]*(len(W)));
-	U.append([0]*(len(W)));
-	B.append(([" "]+["-"]*(len(W)-1)));
-	for i in range(len(V)-1):
-		S.append(([0]+[None]*(len(W)-1)));
-		L.append(([0]+[None]*(len(W)-1)));
-		U.append(([0]+[None]*(len(W)-1)));
-		B.append((["|"]+[None]*(len(W)-1)));
-	for i in range(1,len(V)): #horizontal
-		#S[y,x];
-		for j in range(1,len(W)): #vertical
-			#lower level. horizontal edges		gaps in w
-			L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
-			#print("- gap:", "continue gap w:", (L[i-1][j] - a), "start gap from middle:" , (S[i-1][j]-(p+a)));
-			#upper level. vertical edges		gaps in v
-			U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
-			#print("| gap:", "continue gap v:", (U[i][j-1] - a), "start gap from middle:" , (S[i][j-1]-(p+a)));
-			#main level. diagonal edges			matches/mismatches
-			S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
-			#print("main:", i, j, "\tmatch:", (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), "\tgap w:", L[i][j], "\tgap v:" , U[i][j]);
-			#note: There could be instances in which one path is equal to another. This is what recBacktrace() is for. 
-			#but the extra layers make finding all possible paths too complex for the moment. This possibility can be revisited.
-			#This would be a good place to test if multiple paths occur, if we want to explore that option.
-			if(S[i][j] == L[i][j]):
-				B[i][j] = "-";
-			if(S[i][j] == U[i][j]):
-				B[i][j] = "|";
-			if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
-				B[i][j] = "\\";
-	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
-	ourPaths.reverse();
-
-	return (S, ourPaths);
-
-def banding(word1, word2):
-	#k is constant. we'll make it 3 for no particular reason.
-	k = 1;
-	N = len(word1);
-	#d is another constant chosen arbitrarily
-	d = 2;
-	#F = ([([None]*(len(word1)+1))]*(len(word2)+1));
-	#this caused a problem that was solved here: https://stackoverflow.com/questions/9459337/assign-value-to-an-individual-cell-in-a-two-dimensional-python-array
-
-	F =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ]
-	S = dynGrid(word1, word2)[0];
-	for i in range(k+1):
-		F[i][0] = 0; #I have no idea what number these should be initialized to
-	for j in range(k+1):
-		F[0][j] = 0; #I have no idea what number these should be initialized to
-	for i in range(1,N+1):
-		for j in range(max(1,i-k),min(N,i+k)+1):
-			if((i-j)>k):
-				F[i][j] = max((F[i][j-1]-d),(F[i-1][j-1] + S[i][j]));
-			elif((j-i)>k):
-				F[i][j] = max((F[i-1][j]-d),(F[i-1][j-1] + S[i][j]));
-			else:
-				F[i][j] = (F[i-1][j-1] + S[i][j]);
-	tinyprintGrid(word1, word2, S);
-	for i in F:
-		print(i);
-	return (S, F);
 	
 def alignmentProcess(word1, word2):
 	smLocal = smithWatermanAlign(word1, word2);
@@ -641,8 +649,11 @@ def alignmentProcess(word1, word2):
 	print(gap[1]);
 	shortPrintAlignment(word1, word2, smLocal[1]);
 	shortPrintAlignment(word1, word2, gap[1]);
+
+#-----high level function calls-------------
+
 #tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
-#alignmentProcess("ATCGTAC", "ATGTTAT");
+alignmentProcess("ATCGTAC", "ATGTTAT");
 #alignmentProcess("EEEEEKKKKKAAAAAFFF", "EEEEEBBBBBFFF");
 
-banding("ATCGTAC", "ATGTTAT");
+#banding("ATCGTAC", "ATGTTAT");
