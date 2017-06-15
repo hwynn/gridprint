@@ -249,6 +249,19 @@ def DeltaBLOSUM(vi, wj):
 	return Bindex[vx.index(vi)][vx.index(wj)];
 	#this could use some error checking
 
+def proteinFromFile(filename):
+	fo = open(filename, "r+", encoding='utf-8');
+	header = fo.readline();
+	line = fo.readline();
+	full = "";
+	while(line!=""): #kinda dangerous
+		full = full + line;
+		line = fo.readline();
+	fo.close();
+	return full;
+#s1 = proteinFromFile("mouse_hemoglobin_alpha.fasta.txt");
+#s2 = proteinFromFile("human_hemoglobin_alpha.fasta.txt");
+
 #----recursive traceback algorithms-------------
 	
 def recBackTrigger(v, w, s):
@@ -386,7 +399,7 @@ def smithWatermanAlign(y, x): #smith
 	for point in ourPaths:
 		#print(point[1], point[0]);
 		dirPath.append(B[point[1]][point[0]]);
-	return (S, ourPaths, dirPath);	
+	return (S, ourPaths, dirPath);
 
 def affineGap(y, x):
 	#v and w in local alignment are substrings of v and w. 
@@ -557,6 +570,10 @@ def shortPrintAlignment(v, w, path):
 	return 0;
 
 def tinyprintGrid(v, w, s):
+	#w has maximum size of 14
+	if(len(w)>14):
+		print("Sorry. I can't print a grid of this. It's too big.");
+		return 0;
 	V = [" "]+list(v);
 	W = [" "]+list(w);
 	print(" "*5, end="");
@@ -592,6 +609,7 @@ def tinyprintGrid(v, w, s):
 	for j in range(len(W)-1):
 		print("=", str(s[len(V)-1][j]).center(3," "), "=", sep="", end="");
 	print("=", str(s[len(V)-1][-1]).center(3," "), "=",sep="");
+	return 0;
 
 def printLCS(b, V, i, j):
 	if(i==0 or j==0):
@@ -646,14 +664,13 @@ def alignmentProcess(word1, word2):
 		#print(row, "\t", word1[row[1]], word2[row[0]]);
 	tinyprintGrid(word1, word2, smLocal[0]);
 	tinyprintGrid(word1, word2, gap[0]);
-	print(gap[1]);
 	shortPrintAlignment(word1, word2, smLocal[1]);
 	shortPrintAlignment(word1, word2, gap[1]);
 
 #-----high level function calls-------------
 
 #tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
-alignmentProcess("ATCGTAC", "ATGTTAT");
-#alignmentProcess("EEEEEKKKKKAAAAAFFF", "EEEEEBBBBBFFF");
+#alignmentProcess("ATCGTAC", "ATGTTAT");
+alignmentProcess("EEEEEKKKKKAAAAAFFF", "EEEEEBBBBBFFFAA");
 
 #banding("ATCGTAC", "ATGTTAT");
