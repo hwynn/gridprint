@@ -216,7 +216,7 @@ class Grid(object):
 
 #ourGrid = Grid("ATCGTAC","ATGTTAT");
 #ourGrid.GridShowLCSprocess();
-	
+
 #BLOSUM stuff
 vx = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V', 'B', 'Z', 'X', '-'];
 wx = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V', 'B', 'Z', 'X', '-'];
@@ -341,7 +341,10 @@ def quickGrid(y, x):
 				B[i][j] = ('\\');
 			else:
 				print("error: cannot determine backtracing direction");
-	return (S[len(y)][len(x)], B);
+	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
+	del ourPaths[-1];
+	ourPaths.reverse();
+	return (S, ourPaths);
 
 def dynGrid(y, x):
 	V = [" "]+list(y);
@@ -368,7 +371,10 @@ def dynGrid(y, x):
 				B[i][j] = ('\\');
 			else:
 				print("error: cannot determine backtracing direction");
-	return (S, B);
+	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
+	del ourPaths[-1];
+	ourPaths.reverse();
+	return (S, ourPaths);
 
 def smithWatermanAlign(y, x): #smith
 	V = ["-"]+list(y);
@@ -393,13 +399,14 @@ def smithWatermanAlign(y, x): #smith
 			else:
 				print("error: cannot determine backtracing direction at B[",i, "][", j, "]  ", S[i][j], sep="");
 	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
+	del ourPaths[-1];
 	ourPaths.reverse();
 	dirPath = [];
 	#print(len(y), len(x), len(B), len(B[0]), len(B[-1]));
 	for point in ourPaths:
 		#print(point[1], point[0]);
 		dirPath.append(B[point[1]][point[0]]);
-	return (S, ourPaths, dirPath);
+	return (S, ourPaths, dirPath);	
 
 def affineGap(y, x):
 	#v and w in local alignment are substrings of v and w. 
@@ -413,37 +420,54 @@ def affineGap(y, x):
 	B = [];
 	a = 1;
 	p = 11;
-	S.append([0]*(len(W)));
-	L.append([0]*(len(W)));
-	U.append([0]*(len(W)));
-	B.append(([" "]+["-"]*(len(W)-1)));
+	S.append(([None]*(len(W))));
+	L.append(([None]*(len(W))));
+	U.append(([None]*(len(W))));
+	B.append(([None]*(len(W))));
 	for i in range(len(V)-1):
-		S.append(([0]+[None]*(len(W)-1)));
-		L.append(([0]+[None]*(len(W)-1)));
-		U.append(([0]+[None]*(len(W)-1)));
-		B.append((["|"]+[None]*(len(W)-1)));
-	for i in range(1,len(V)): #horizontal
+		S.append([None]*(len(W)));
+		L.append([None]*(len(W)));
+		U.append([None]*(len(W)));
+		B.append([None]*(len(W)));
+	for i in range(len(V)): #horizontal
 		#S[y,x];
-		for j in range(1,len(W)): #vertical
-			#lower level. horizontal edges		gaps in w
-			L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
-			#print("- gap:", "continue gap w:", (L[i-1][j] - a), "start gap from middle:" , (S[i-1][j]-(p+a)));
-			#upper level. vertical edges		gaps in v
-			U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
-			#print("| gap:", "continue gap v:", (U[i][j-1] - a), "start gap from middle:" , (S[i][j-1]-(p+a)));
-			#main level. diagonal edges			matches/mismatches
-			S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
-			#print("main:", i, j, "\tmatch:", (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), "\tgap w:", L[i][j], "\tgap v:" , U[i][j]);
-			#note: There could be instances in which one path is equal to another. This is what recBacktrace() is for. 
-			#but the extra layers make finding all possible paths too complex for the moment. This possibility can be revisited.
-			#This would be a good place to test if multiple paths occur, if we want to explore that option.
-			if(S[i][j] == L[i][j]):
-				B[i][j] = "-";
-			if(S[i][j] == U[i][j]):
+		for j in range(len(W)): #vertical
+			if(i==0 and j==0):
+				L[i][j] = 0;
+				U[i][j] = 0;
+				S[i][j] = 0;
+				B[i][j] = " ";
+			elif(i==0):
+				L[i][j] = 0;
+				U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));
+				S[i][j] = U[i][j];
 				B[i][j] = "|";
-			if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
-				B[i][j] = "\\";
+			elif(j==0):
+				L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));
+				U[i][j] = 0;
+				S[i][j] = L[i][j];
+				B[i][j] = "-";
+			else:
+				#lower level. horizontal edges		gaps in w
+				L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
+				#print("- gap:", "continue gap w:", (L[i-1][j] - a), "start gap from middle:" , (S[i-1][j]-(p+a)));
+				#upper level. vertical edges		gaps in v
+				U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
+				#print("| gap:", "continue gap v:", (U[i][j-1] - a), "start gap from middle:" , (S[i][j-1]-(p+a)));
+				#main level. diagonal edges			matches/mismatches
+				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
+				#print("main:", i, j, "\tmatch:", (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), "\tgap w:", L[i][j], "\tgap v:" , U[i][j]);
+				#note: There could be instances in which one path is equal to another. This is what recBacktrace() is for. 
+				#but the extra layers make finding all possible paths too complex for the moment. This possibility can be revisited.
+				#This would be a good place to test if multiple paths occur, if we want to explore that option.
+				if(S[i][j] == L[i][j]):
+					B[i][j] = "-";
+				if(S[i][j] == U[i][j]):
+					B[i][j] = "|";
+				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
+					B[i][j] = "\\";
 	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
+	del ourPaths[-1];
 	ourPaths.reverse();
 
 	return (S, ourPaths);
@@ -451,6 +475,8 @@ def affineGap(y, x):
 def banding(word1, word2):
 	#k is constant. we'll make it 3 for no particular reason.
 	k = 1;
+	if(len(word2) > len(word1)):
+		k = k + (len(word2) - len(word1));
 	N = len(word1);
 	#d is another constant chosen arbitrarily
 	d = 2;
@@ -567,6 +593,7 @@ def shortPrintAlignment(v, w, path):
 			print(top, middle, bottom, sep="\n");
 
 	print("");
+	print("");
 	return 0;
 
 def tinyprintGrid(v, w, s):
@@ -623,7 +650,7 @@ def printLCS(b, V, i, j):
 		printLCS(b, V, i, j-1);
 
 #----operation running functions-----------
-		
+
 def fastLCS(word1, word2):
 	printLCS(dynGrid(word1, word2)[1], " "+word1, len(word1), len(word2));
 
@@ -656,21 +683,28 @@ def showLCSprocess(word1, word2):
 	print("");
 
 	return 0;
-	
+
 def alignmentProcess(word1, word2):
+	edit = dynGrid(word1, word2);
 	smLocal = smithWatermanAlign(word1, word2);
 	gap = affineGap(word1, word2);
 	#for row in smLocal[1]:
 		#print(row, "\t", word1[row[1]], word2[row[0]]);
+	print("Using Longest Common String:");
+	tinyprintGrid(word1, word2, edit[0]);
+	shortPrintAlignment(word1, word2, edit[1]);
+	print("Using Smith-Waterman Alignment:");
 	tinyprintGrid(word1, word2, smLocal[0]);
-	tinyprintGrid(word1, word2, gap[0]);
 	shortPrintAlignment(word1, word2, smLocal[1]);
+	print("");
+	print("Using affine gap penalty:");
+	tinyprintGrid(word1, word2, gap[0]);
 	shortPrintAlignment(word1, word2, gap[1]);
 
 #-----high level function calls-------------
 
 #tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
-#alignmentProcess("ATCGTAC", "ATGTTAT");
-alignmentProcess("EEEEEKKKKKAAAAAFFF", "EEEEEBBBBBFFFAA");
+alignmentProcess("ATCGTAC", "ATGTTAT");
+#alignmentProcess("EEEEEBBBBBFFF", "EEEEEKKKKKAAAAAFFF");
 
 #banding("ATCGTAC", "ATGTTAT");
