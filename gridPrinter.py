@@ -472,6 +472,48 @@ def affineGap(y, x):
 
 	return (S, ourPaths);
 
+def localAffineGap(y, x):
+ 	L = [];
+ 	U = [];
+ 	B = [];
+ 	a = 1;
+ 	p = 11;
+	S.append([0]*(len(W)));
+	L.append([0]*(len(W)));
+	U.append([0]*(len(W)));
+	B.append(([" "]+["-"]*(len(W)-1)));
+ 	for i in range(len(V)-1):
+		S.append(([0]+[None]*(len(W)-1)));
+		L.append(([0]+[None]*(len(W)-1)));
+		U.append(([0]+[None]*(len(W)-1)));
+		B.append((["|"]+[None]*(len(W)-1)));
+	for i in range(1,len(V)): #horizontal
+ 		#S[y,x];
+		for j in range(1,len(W)): #vertical
+			#lower level. horizontal edges		gaps in w
+			L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
+			#print("- gap:", "continue gap w:", (L[i-1][j] - a), "start gap from middle:" , (S[i-1][j]-(p+a)));
+			#upper level. vertical edges		gaps in v
+			U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
+			#print("| gap:", "continue gap v:", (U[i][j-1] - a), "start gap from middle:" , (S[i][j-1]-(p+a)));
+			#main level. diagonal edges			matches/mismatches
+			S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
+			#print("main:", i, j, "\tmatch:", (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), "\tgap w:", L[i][j], "\tgap v:" , U[i][j]);
+			#note: There could be instances in which one path is equal to another. This is what recBacktrace() is for. 
+			#but the extra layers make finding all possible paths too complex for the moment. This possibility can be revisited.
+			#This would be a good place to test if multiple paths occur, if we want to explore that option.
+			if(S[i][j] == L[i][j]):
+				B[i][j] = "-";
+			if(S[i][j] == U[i][j]):
+				B[i][j] = "|";
+			if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
+				B[i][j] = "\\";
+ 	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
+	del ourPaths[-1];
+ 	ourPaths.reverse();
+	
+ 	return (S, ourPaths);
+
 def banding(word1, word2):
 	#k is constant. we'll make it 3 for no particular reason.
 	k = 1;
