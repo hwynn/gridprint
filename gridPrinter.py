@@ -473,22 +473,22 @@ def affineGap(y, x):
 	return (S, ourPaths);
 
 def localAffineGap(y, x):
- 	L = [];
- 	U = [];
- 	B = [];
- 	a = 1;
- 	p = 11;
+	L = [];
+	U = [];
+	B = [];
+	a = 1;
+	p = 11;
 	S.append([0]*(len(W)));
 	L.append([0]*(len(W)));
 	U.append([0]*(len(W)));
 	B.append(([" "]+["-"]*(len(W)-1)));
- 	for i in range(len(V)-1):
+	for i in range(len(V)-1):
 		S.append(([0]+[None]*(len(W)-1)));
 		L.append(([0]+[None]*(len(W)-1)));
 		U.append(([0]+[None]*(len(W)-1)));
 		B.append((["|"]+[None]*(len(W)-1)));
 	for i in range(1,len(V)): #horizontal
- 		#S[y,x];
+		#S[y,x];
 		for j in range(1,len(W)): #vertical
 			#lower level. horizontal edges		gaps in w
 			L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
@@ -508,15 +508,17 @@ def localAffineGap(y, x):
 				B[i][j] = "|";
 			if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
 				B[i][j] = "\\";
- 	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
+	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
 	del ourPaths[-1];
- 	ourPaths.reverse();
+	ourPaths.reverse();
 	
- 	return (S, ourPaths);
+	return (S, ourPaths);
 
 def banding(word1, word2):
+	V = [" "]+list(word1);
+	W = [" "]+list(word2);
 	#k is constant. we'll make it 3 for no particular reason.
-	k = 1;
+	k = 2;
 	if(len(word2) > len(word1)):
 		k = k + (len(word2) - len(word1));
 	N = len(word1);
@@ -524,15 +526,58 @@ def banding(word1, word2):
 	d = 2;
 	#F = ([([None]*(len(word1)+1))]*(len(word2)+1));
 	#this caused a problem that was solved here: https://stackoverflow.com/questions/9459337/assign-value-to-an-individual-cell-in-a-two-dimensional-python-array
-
-	F =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ]
-	S = dynGrid(word1, word2)[0];
+	S  =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
+	F =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
+	B =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
+	#S = dynGrid(word1, word2)[0];
 	for i in range(k+1):
 		F[i][0] = 0; #I have no idea what number these should be initialized to
+		S[i][0] = 0;
 	for j in range(k+1):
 		F[0][j] = 0; #I have no idea what number these should be initialized to
+		S[0][j] = 0;
 	for i in range(1,N+1):
 		for j in range(max(1,i-k),min(N,i+k)+1):
+			B[i][j] = 0;
+			if((j-i)==k): #cannot use [i-1][j]
+				if(V[i]==W[j]):
+					S[i][j] = max(0, (S[i][j-1]+0), (S[i-1][j-1] + 1)); #matches
+				else:
+					S[i][j] = max(0, (S[i][j-1]+0)); #deletions, insertions
+					
+				if(S[i][j] == S[i][j-1]):
+					B[i][j] = "-";
+				elif(S[i][j] == S[i-1][j-1]+1):
+					B[i][j] = ('\\');
+				else:
+					print("error: cannot determine backtracing direction");
+			elif((i-j)==k): #cannot use [i][j-1]
+				if(V[i]==W[j]):
+					S[i][j] = max(0, (S[i-1][j]+0), (S[i-1][j-1] + 1)); #matches
+				else:
+					S[i][j] = max(0, (S[i-1][j]+0)); #deletions, insertions
+ 
+				if(S[i][j] == S[i-1][j]):
+					B[i][j] = "|";
+				elif(S[i][j] == S[i-1][j-1]+1):
+					B[i][j] = ('\\');
+				else:
+					print("error: cannot determine backtracing direction");
+			else: #we're assuming this is inside the band
+				if(V[i]==W[j]):
+					S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0), (S[i-1][j-1] + 1)); #matches
+				else:
+					S[i][j] = max(0, (S[i-1][j]+0), (S[i][j-1]+0)); #deletions, insertions
+				
+				if(S[i][j] == S[i-1][j]):
+					B[i][j] = "|";
+				elif(S[i][j] == S[i][j-1]):
+					B[i][j] = "-";
+				elif(S[i][j] == S[i-1][j-1]+1):
+					B[i][j] = ('\\');
+				else:
+					print("error: cannot determine backtracing direction");
+				
 			if((i-j)>k):
 				F[i][j] = max((F[i][j-1]-d),(F[i-1][j-1] + S[i][j]));
 			elif((j-i)>k):
@@ -542,7 +587,15 @@ def banding(word1, word2):
 	tinyprintGrid(word1, word2, S);
 	for i in F:
 		print(i);
+	print("");
+	for i in B:
+		print(i);
+	for i in S:
+		print(i);
 	return (S, F);
+
+#def globalAlign(word1, word2):
+	
 
 #---printing/displaying functions--------------------
 
@@ -749,4 +802,4 @@ def alignmentProcess(word1, word2):
 alignmentProcess("ATCGTAC", "ATGTTAT");
 #alignmentProcess("EEEEEBBBBBFFF", "EEEEEKKKKKAAAAAFFF");
 
-#banding("ATCGTAC", "ATGTTAT");
+banding("ATCGTAC", "ATGTTAT");
