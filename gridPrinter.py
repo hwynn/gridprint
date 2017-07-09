@@ -518,7 +518,7 @@ def banding(word1, word2):
 	V = [" "]+list(word1);
 	W = [" "]+list(word2);
 	#k is constant. we'll make it 3 for no particular reason.
-	k = 2;
+	k = 3;
 	if(len(word2) > len(word1)):
 		k = k + (len(word2) - len(word1));
 	N = len(word1);
@@ -526,16 +526,18 @@ def banding(word1, word2):
 	d = 2;
 	#F = ([([None]*(len(word1)+1))]*(len(word2)+1));
 	#this caused a problem that was solved here: https://stackoverflow.com/questions/9459337/assign-value-to-an-individual-cell-in-a-two-dimensional-python-array
-	S  =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
+	S =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
 	F =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
 	B =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
 	#S = dynGrid(word1, word2)[0];
 	for i in range(k+1):
 		F[i][0] = 0; #I have no idea what number these should be initialized to
 		S[i][0] = 0;
+		B[i][0] = "|";
 	for j in range(k+1):
 		F[0][j] = 0; #I have no idea what number these should be initialized to
 		S[0][j] = 0;
+		B[0][j] = "-";
 	for i in range(1,N+1):
 		for j in range(max(1,i-k),min(N,i+k)+1):
 			B[i][j] = 0;
@@ -594,9 +596,113 @@ def banding(word1, word2):
 		print(i);
 	return (S, F);
 
-#def globalAlign(word1, word2):
-	
+def globalAlign(word1, word2):
+	#v and w in local alignment are substrings of v and w. 
+	#alignments will have to be adjusted to reflect their positions in the global edit graph. 
+	#so some other function should be in charge of calling and adjusting the results of this
+	V = [" "]+list(word1);
+	W = [" "]+list(word2);
+	S =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
+	L =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
+	U =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
+	F =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
+	B =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
+	a = 1;
+	p = 11;
+	#k is constant. we'll make it 3 for no particular reason.
+	k = 3;
+	if(len(word2) > len(word1)):
+		k = k + (len(word2) - len(word1));
+	N = len(word1);
+	#d is another constant chosen arbitrarily
+	d = 2;
+	#for point [0][0]
+	L[0][0] = 0;
+	U[0][0] = 0;
+	S[0][0] = 0;
+	B[0][0] = " ";
+	F[0][0] = 0;
 
+	for i in range(1,k+1):
+		L[i][0] = max((L[i-1][0] - a), (S[i-1][0]-(p+a)));
+		U[i][0] = 0;
+		S[i][0] = L[i][0];
+		B[i][0] = "|";
+		F[i][0] = 0; #I have no idea what number these should be initialized to
+	for j in range(1,k+1):
+		L[0][j] = 0;
+		U[0][j] = max((U[0][j-1] - a), (S[0][j-1]-(p+a)));
+		S[0][j] = U[0][j];
+		B[0][j] = "-";
+		F[0][j] = 0; #I have no idea what number these should be initialized to
+	for i in range(1,N+1):
+		for j in range(max(1,i-k),min(N,i+k)+1):
+			if((j-i)==k): #cannot use [i-1][j]
+				L[i][j] = 0;	#deletions. But we can't have any of these here
+				U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
+				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j]);
+				
+				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
+					B[i][j] = ('\\');
+				elif(S[i][j] == U[i][j]):
+					B[i][j] = "-";
+				elif(S[i][j] == L[i][j]):
+					B[i][j] = "|";
+					print("error: path is leading outside the band");
+				else:
+					print("error: cannot determine backtracing direction");
+			elif((i-j)==k): #cannot use [i][j-1]
+				L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
+				U[i][j] = 0;	#insertions. But we can't have any of these here
+				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), L[i][j]);
+				
+				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
+					B[i][j] = ('\\');
+				elif(S[i][j] == L[i][j]):
+					B[i][j] = "|";
+				elif(S[i][j] == U[i][j]):
+					B[i][j] = "-";
+					print("error: path is leading outside the band");
+				else:
+					print("error: cannot determine backtracing direction");
+				
+			else: #we're assuming this is inside the band
+				L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
+				U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
+				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
+
+				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
+					B[i][j] = ('\\');
+				elif(S[i][j] == L[i][j]):
+					B[i][j] = "|";
+				elif(S[i][j] == U[i][j]):
+					B[i][j] = "-";
+				else:
+					print("error: cannot determine backtracing direction");
+				
+			if((i-j)>k):
+				F[i][j] = max((F[i][j-1]-d),(F[i-1][j-1] + S[i][j]));
+			elif((j-i)>k):
+				F[i][j] = max((F[i-1][j]-d),(F[i-1][j-1] + S[i][j]));
+			else:
+				F[i][j] = (F[i-1][j-1] + S[i][j]);
+	
+	ourPaths = bRecBacktrace(S, word1, word2, B, len(word2),len(word1));
+	del ourPaths[-1];
+	ourPaths.reverse();
+	
+	print("F:");
+	for i in F:
+		print(i);
+	print("");
+	print("B:");
+	for i in B:
+		print(i);
+	print("S:");
+	for i in S:
+		print(i);
+	return (S, ourPaths, F);
+		
 #---printing/displaying functions--------------------
 
 def printAlignment(v, w, path):
@@ -794,7 +900,11 @@ def alignmentProcess(word1, word2):
 	print("");
 	print("Using affine gap penalty:");
 	tinyprintGrid(word1, word2, gap[0]);
+	print("Using a:");
 	shortPrintAlignment(word1, word2, gap[1]);
+	
+	print("banding:");
+	banding("ATCGTAC", "ATGTTAT");
 
 #-----high level function calls-------------
 
@@ -802,4 +912,5 @@ def alignmentProcess(word1, word2):
 alignmentProcess("ATCGTAC", "ATGTTAT");
 #alignmentProcess("EEEEEBBBBBFFF", "EEEEEKKKKKAAAAAFFF");
 
-banding("ATCGTAC", "ATGTTAT");
+print("banded global alignment:");
+globalAlign("ATCGTAC", "ATGTTAT");
