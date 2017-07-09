@@ -586,15 +586,18 @@ def banding(word1, word2):
 				F[i][j] = max((F[i-1][j]-d),(F[i-1][j-1] + S[i][j]));
 			else:
 				F[i][j] = (F[i-1][j-1] + S[i][j]);
-	tinyprintGrid(word1, word2, S);
+	ourPaths = bRecBacktrace(S, word1, word2, B, len(word2),len(word1));
+	del ourPaths[-1];
+	ourPaths.reverse();
+	"""tinyprintGrid(word1, word2, S);
 	for i in F:
 		print(i);
 	print("");
 	for i in B:
 		print(i);
 	for i in S:
-		print(i);
-	return (S, F);
+		print(i);"""
+	return (S, ourPaths, F);
 
 def globalAlign(word1, word2):
 	#v and w in local alignment are substrings of v and w. 
@@ -690,8 +693,7 @@ def globalAlign(word1, word2):
 	ourPaths = bRecBacktrace(S, word1, word2, B, len(word2),len(word1));
 	del ourPaths[-1];
 	ourPaths.reverse();
-	
-	print("F:");
+	"""print("F:");
 	for i in F:
 		print(i);
 	print("");
@@ -700,7 +702,7 @@ def globalAlign(word1, word2):
 		print(i);
 	print("S:");
 	for i in S:
-		print(i);
+		print(i);"""
 	return (S, ourPaths, F);
 		
 #---printing/displaying functions--------------------
@@ -889,6 +891,8 @@ def alignmentProcess(word1, word2):
 	edit = dynGrid(word1, word2);
 	smLocal = smithWatermanAlign(word1, word2);
 	gap = affineGap(word1, word2);
+	band1 = banding(word1, word2);
+	glob1 = globalAlign(word1, word2);
 	#for row in smLocal[1]:
 		#print(row, "\t", word1[row[1]], word2[row[0]]);
 	print("Using Longest Common String:");
@@ -902,15 +906,19 @@ def alignmentProcess(word1, word2):
 	tinyprintGrid(word1, word2, gap[0]);
 	print("Using a:");
 	shortPrintAlignment(word1, word2, gap[1]);
-	
 	print("banding:");
-	banding("ATCGTAC", "ATGTTAT");
-
+	tinyprintGrid(word1, word2, band1[0]);
+	shortPrintAlignment(word1, word2, band1[1]);
+	print("banded global alignment:");
+	tinyprintGrid(word1, word2, glob1[0]);
+	shortPrintAlignment(word1, word2, glob1[1]);
 #-----high level function calls-------------
 
 #tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
-alignmentProcess("ATCGTAC", "ATGTTAT");
+s1 = proteinFromFile("mouse_hemoglobin_alpha.fasta.txt");
+s2 = proteinFromFile("human_hemoglobin_alpha.fasta.txt");
+alignmentProcess(s1, s2);
 #alignmentProcess("EEEEEBBBBBFFF", "EEEEEKKKKKAAAAAFFF");
 
-print("banded global alignment:");
-globalAlign("ATCGTAC", "ATGTTAT");
+
+
