@@ -255,6 +255,8 @@ def proteinFromFile(filename):
 	line = fo.readline();
 	full = "";
 	while(line!=""): #kinda dangerous
+		if(line[-1]=='\n'):
+			line =  line[0:-1];
 		full = full + line;
 		line = fo.readline();
 	fo.close();
@@ -263,7 +265,7 @@ def proteinFromFile(filename):
 #s2 = proteinFromFile("human_hemoglobin_alpha.fasta.txt");
 
 #----recursive traceback algorithms-------------
-	
+
 def recBackTrigger(v, w, s):
 	myList = recBacktrace(v, w, s,len(w),len(v));
 	for x in myList:
@@ -299,20 +301,43 @@ def recBacktrace(v, w, s, x, y, CPath=[[]]):
 def bRecBacktrace(s, v, w, b, x, y, CPath=[]):
 	V = [" "]+list(v);
 	W = [" "]+list(w);
+	#print("Y:", len(v), "X:", len(w), "i:", y, "j:", x);
 	pathList = copy.deepcopy(CPath); #we will append the current position to this
 	pathList.append([x, y]);
 	if(x==0 and y==0):
 		return pathList;
-	#s[y,x]
-	#did we come from above?
-	if(b[y][x] == "|"):
-		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x, y-1, pathList));
-	#did we come from the left?
-	if(b[y][x] == "-"):
-		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y, pathList));		
-	#did we come diagonally?
-	if(b[y][x] == "\\"):
-		pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y-1, pathList));
+	elif(x==0):
+		#did we come from above?
+		if(b[y][x] == "|"):
+			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x, y-1, pathList));
+		else:
+			print("error: cannot traceback above");
+			print(pathList);
+			print(b[y][x]);
+		#did we come diagonally?
+		if(b[y][x] == "\\"):
+			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y-1, pathList));
+	elif(y==0):
+		#did we come from the left?
+		if(b[y][x] == "-"):
+			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y, pathList));
+		else:
+			print("error: cannot traceback left");
+		#did we come diagonally?
+		if(b[y][x] == "\\"):
+			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y-1, pathList));
+	elif(y<1 or x<1):
+		print("error: unidentified traceback error");
+	else:
+		#did we come from above?
+		if(b[y][x] == "|"):
+			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x, y-1, pathList));
+		#did we come from the left?
+		if(b[y][x] == "-"):
+			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y, pathList));		
+		#did we come diagonally?
+		if(b[y][x] == "\\"):
+			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y-1, pathList));
 	return copy.deepcopy(pathList);
 
 #----grid navigating algorithms-----------------------
@@ -437,22 +462,22 @@ def affineGap(y, x):
 				U[i][j] = 0;
 				S[i][j] = 0;
 				B[i][j] = " ";
-			elif(i==0):
+			elif(j==0): #cannot use [i-1][j]
 				L[i][j] = 0;
-				U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));
+				U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
 				S[i][j] = U[i][j];
 				B[i][j] = "|";
-			elif(j==0):
-				L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));
+			elif(i==0): #cannot use [i][j-1]
+				L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
 				U[i][j] = 0;
 				S[i][j] = L[i][j];
 				B[i][j] = "-";
 			else:
 				#lower level. horizontal edges		gaps in w
-				L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
+				L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
 				#print("- gap:", "continue gap w:", (L[i-1][j] - a), "start gap from middle:" , (S[i-1][j]-(p+a)));
 				#upper level. vertical edges		gaps in v
-				U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
+				U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
 				#print("| gap:", "continue gap v:", (U[i][j-1] - a), "start gap from middle:" , (S[i][j-1]-(p+a)));
 				#main level. diagonal edges			matches/mismatches
 				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
@@ -469,7 +494,7 @@ def affineGap(y, x):
 	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
 	del ourPaths[-1];
 	ourPaths.reverse();
-
+	
 	return (S, ourPaths);
 
 def localAffineGap(y, x):
@@ -487,14 +512,14 @@ def localAffineGap(y, x):
 		L.append(([0]+[None]*(len(W)-1)));
 		U.append(([0]+[None]*(len(W)-1)));
 		B.append((["|"]+[None]*(len(W)-1)));
-	for i in range(1,len(V)): #horizontal
+	for i in range(1,len(V)):
 		#S[y,x];
-		for j in range(1,len(W)): #vertical
+		for j in range(1,len(W)):
 			#lower level. horizontal edges		gaps in w
-			L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
+			L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
 			#print("- gap:", "continue gap w:", (L[i-1][j] - a), "start gap from middle:" , (S[i-1][j]-(p+a)));
 			#upper level. vertical edges		gaps in v
-			U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
+			U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
 			#print("| gap:", "continue gap v:", (U[i][j-1] - a), "start gap from middle:" , (S[i][j-1]-(p+a)));
 			#main level. diagonal edges			matches/mismatches
 			S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
@@ -521,14 +546,17 @@ def banding(word1, word2):
 	k = 3;
 	if(len(word2) > len(word1)):
 		k = k + (len(word2) - len(word1));
+	elif(len(word2) < len(word1)):
+		k = k + (len(word1) - len(word2));
 	N = len(word1);
+	M = len(word2);
 	#d is another constant chosen arbitrarily
 	d = 2;
 	#F = ([([None]*(len(word1)+1))]*(len(word2)+1));
 	#this caused a problem that was solved here: https://stackoverflow.com/questions/9459337/assign-value-to-an-individual-cell-in-a-two-dimensional-python-array
-	S =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
-	F =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
-	B =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
+	S =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
+	F =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
+	B =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
 	#S = dynGrid(word1, word2)[0];
 	for i in range(k+1):
 		F[i][0] = 0; #I have no idea what number these should be initialized to
@@ -539,7 +567,8 @@ def banding(word1, word2):
 		S[0][j] = 0;
 		B[0][j] = "-";
 	for i in range(1,N+1):
-		for j in range(max(1,i-k),min(N,i+k)+1):
+		for j in range(max(1,i-k),min(M,i+k)+1):
+			#print(len(V), "down,", len(W), "across,", "Size:", len(B), len(B[i]), "Attempting:", i, j);
 			B[i][j] = 0;
 			if((j-i)==k): #cannot use [i-1][j]
 				if(V[i]==W[j]):
@@ -597,6 +626,8 @@ def banding(word1, word2):
 		print(i);
 	for i in S:
 		print(i);"""
+	for row in B[0:11]:
+		print(row[0:11]);
 	return (S, ourPaths, F);
 
 def globalAlign(word1, word2):
@@ -605,18 +636,21 @@ def globalAlign(word1, word2):
 	#so some other function should be in charge of calling and adjusting the results of this
 	V = [" "]+list(word1);
 	W = [" "]+list(word2);
-	S =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
-	L =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
-	U =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
-	F =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
-	B =[[ None for i in range(len(word1)+1)] for j in range(len(word2)+1) ];
+	S =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
+	L =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
+	U =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
+	F =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
+	B =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
 	a = 1;
 	p = 11;
 	#k is constant. we'll make it 3 for no particular reason.
 	k = 3;
 	if(len(word2) > len(word1)):
 		k = k + (len(word2) - len(word1));
+	elif(len(word2) < len(word1)):
+		k = k + (len(word1) - len(word2));
 	N = len(word1);
+	M = len(word2);
 	#d is another constant chosen arbitrarily
 	d = 2;
 	#for point [0][0]
@@ -627,59 +661,60 @@ def globalAlign(word1, word2):
 	F[0][0] = 0;
 
 	for i in range(1,k+1):
-		L[i][0] = max((L[i-1][0] - a), (S[i-1][0]-(p+a)));
-		U[i][0] = 0;
-		S[i][0] = L[i][0];
+		L[i][0] = 0;
+		U[i][0] = max((U[i-1][0] - a), (S[i-1][0]-(p+a)));
+		S[i][0] = U[i][0];
 		B[i][0] = "|";
 		F[i][0] = 0; #I have no idea what number these should be initialized to
 	for j in range(1,k+1):
-		L[0][j] = 0;
-		U[0][j] = max((U[0][j-1] - a), (S[0][j-1]-(p+a)));
-		S[0][j] = U[0][j];
+		L[0][j] = max((L[0][j-1] - a), (S[0][j-1]-(p+a)));
+		U[0][j] = 0;
+		S[0][j] = L[0][j];
 		B[0][j] = "-";
 		F[0][j] = 0; #I have no idea what number these should be initialized to
 	for i in range(1,N+1):
-		for j in range(max(1,i-k),min(N,i+k)+1):
+		for j in range(max(1,i-k),min(M,i+k)+1):
 			if((j-i)==k): #cannot use [i-1][j]
-				L[i][j] = 0;	#deletions. But we can't have any of these here
-				U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
+				L[i][j] = 0;
+				U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));	
+				#print(len(V), "down,", len(W), "across,", "Attempting:", i, j);
 				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j]);
 				
 				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
 					B[i][j] = ('\\');
-				elif(S[i][j] == U[i][j]):
-					B[i][j] = "-";
 				elif(S[i][j] == L[i][j]):
+					B[i][j] = "-";
+				elif(S[i][j] == U[i][j]):
 					B[i][j] = "|";
 					print("error: path is leading outside the band");
 				else:
 					print("error: cannot determine backtracing direction");
 			elif((i-j)==k): #cannot use [i][j-1]
-				L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
-				U[i][j] = 0;	#insertions. But we can't have any of these here
+				L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));	
+				U[i][j] = 0;	
 				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), L[i][j]);
 				
 				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
 					B[i][j] = ('\\');
 				elif(S[i][j] == L[i][j]):
-					B[i][j] = "|";
-				elif(S[i][j] == U[i][j]):
 					B[i][j] = "-";
+				elif(S[i][j] == U[i][j]):
+					B[i][j] = "|";
 					print("error: path is leading outside the band");
 				else:
 					print("error: cannot determine backtracing direction");
 				
 			else: #we're assuming this is inside the band
-				L[i][j] = max((L[i-1][j] - a), (S[i-1][j]-(p+a)));	#deletions
-				U[i][j] = max((U[i][j-1] - a), (S[i][j-1]-(p+a)));	#insertions
+				L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
+				U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
 				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
 
 				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
 					B[i][j] = ('\\');
 				elif(S[i][j] == L[i][j]):
-					B[i][j] = "|";
-				elif(S[i][j] == U[i][j]):
 					B[i][j] = "-";
+				elif(S[i][j] == U[i][j]):
+					B[i][j] = "|";
 				else:
 					print("error: cannot determine backtracing direction");
 				
@@ -744,6 +779,7 @@ def printAlignment(v, w, path):
 	return 0;
 
 def shortPrintAlignment(v, w, path):
+	offset = 60;
 	V = ["-"]+list(v);
 	W = ["-"]+list(w);
 	top = ""; #W
@@ -770,7 +806,7 @@ def shortPrintAlignment(v, w, path):
 		bottom = bottom + V[path[0][1]];
 		
 	for i in range(1,len(path)):
-		if(i%10 == 0):
+		if(i%offset == 0):
 			print(top, middle, bottom, sep="\n");
 			top = "";
 			middle = "";
@@ -888,37 +924,40 @@ def showLCSprocess(word1, word2):
 	return 0;
 
 def alignmentProcess(word1, word2):
+	"""print("Using Longest Common String:");
 	edit = dynGrid(word1, word2);
+	tinyprintGrid(word1, word2, edit[0]);
+	shortPrintAlignment(word1, word2, edit[1]);"""
+	
+	"""print("Using Smith-Waterman Alignment:");
 	smLocal = smithWatermanAlign(word1, word2);
-	gap = affineGap(word1, word2);
-	band1 = banding(word1, word2);
-	glob1 = globalAlign(word1, word2);
 	#for row in smLocal[1]:
 		#print(row, "\t", word1[row[1]], word2[row[0]]);
-	print("Using Longest Common String:");
-	tinyprintGrid(word1, word2, edit[0]);
-	shortPrintAlignment(word1, word2, edit[1]);
-	print("Using Smith-Waterman Alignment:");
 	tinyprintGrid(word1, word2, smLocal[0]);
-	shortPrintAlignment(word1, word2, smLocal[1]);
-	print("");
-	print("Using affine gap penalty:");
+	shortPrintAlignment(word1, word2, smLocal[1]);"""
+	
+	"""print("Using affine gap penalty:");
+	gap = affineGap(word1, word2);
 	tinyprintGrid(word1, word2, gap[0]);
-	print("Using a:");
-	shortPrintAlignment(word1, word2, gap[1]);
+	shortPrintAlignment(word1, word2, gap[1]);"""
+	
 	print("banding:");
-	tinyprintGrid(word1, word2, band1[0]);
+	band1 = banding(word1, word2);
+	tinyprintGrid(word1, word2, band1[0]); 
 	shortPrintAlignment(word1, word2, band1[1]);
-	print("banded global alignment:");
+	
+	"""print("banded global alignment:");
+	glob1 = globalAlign(word1, word2);
 	tinyprintGrid(word1, word2, glob1[0]);
-	shortPrintAlignment(word1, word2, glob1[1]);
+	shortPrintAlignment(word1, word2, glob1[1]);"""
 #-----high level function calls-------------
 
 #tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
-s1 = proteinFromFile("mouse_hemoglobin_alpha.fasta.txt");
-s2 = proteinFromFile("human_hemoglobin_alpha.fasta.txt");
+s1 = proteinFromFile("guitarfish1_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54580.1
+s2 = proteinFromFile("guitarfish2_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54579.1
 alignmentProcess(s1, s2);
-#alignmentProcess("EEEEEBBBBBFFF", "EEEEEKKKKKAAAAAFFF");
+#alignmentProcess(s2, s1);
+#alignmentProcess("EEEEEBBBBBFFF", "EEEEEKKKKKAAAAAFFFFF");
 
 
 
