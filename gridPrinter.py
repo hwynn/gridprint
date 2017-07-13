@@ -433,7 +433,7 @@ def smithWatermanAlign(y, x): #smith
 		dirPath.append(B[point[1]][point[0]]);
 	return (S, ourPaths, dirPath);	
 
-def affineGap(y, x):
+def localAlignment(y, x):
 	#v and w in local alignment are substrings of v and w. 
 	#alignments will have to be adjusted to reflect their positions in the global edit graph. 
 	#so some other function should be in charge of calling and adjusting the results of this
@@ -569,7 +569,7 @@ def banding(word1, word2):
 	for i in range(1,N+1):
 		for j in range(max(1,i-k),min(M,i+k)+1):
 			#print(len(V), "down,", len(W), "across,", "Size:", len(B), len(B[i]), "Attempting:", i, j);
-			B[i][j] = 0;
+			B[i][j] = 0;			#--------------------------------------------------------------------------------WTF IS THIS?
 			if((j-i)==k): #cannot use [i-1][j]
 				if(V[i]==W[j]):
 					S[i][j] = max(0, (S[i][j-1]+0), (S[i-1][j-1] + 1)); #matches
@@ -626,11 +626,11 @@ def banding(word1, word2):
 		print(i);
 	for i in S:
 		print(i);"""
-	for row in B[0:11]:
-		print(row[0:11]);
+	#for row in B[0:11]:
+	#	print(row[0:11]);
 	return (S, ourPaths, F);
 
-def globalAlign(word1, word2):
+def globalAlignment(word1, word2):
 	#v and w in local alignment are substrings of v and w. 
 	#alignments will have to be adjusted to reflect their positions in the global edit graph. 
 	#so some other function should be in charge of calling and adjusting the results of this
@@ -675,32 +675,24 @@ def globalAlign(word1, word2):
 	for i in range(1,N+1):
 		for j in range(max(1,i-k),min(M,i+k)+1):
 			if((j-i)==k): #cannot use [i-1][j]
-				L[i][j] = 0;
-				U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));	
+				L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));	
+				U[i][j] = 0;
 				#print(len(V), "down,", len(W), "across,", "Attempting:", i, j);
-				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j]);
-				
+				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), L[i][j]);
 				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
 					B[i][j] = ('\\');
 				elif(S[i][j] == L[i][j]):
 					B[i][j] = "-";
-				elif(S[i][j] == U[i][j]):
-					B[i][j] = "|";
-					print("error: path is leading outside the band");
 				else:
 					print("error: cannot determine backtracing direction");
 			elif((i-j)==k): #cannot use [i][j-1]
-				L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));	
-				U[i][j] = 0;	
-				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), L[i][j]);
-				
+				L[i][j] = 0;
+				U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
+				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j]);
 				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
 					B[i][j] = ('\\');
-				elif(S[i][j] == L[i][j]):
-					B[i][j] = "-";
 				elif(S[i][j] == U[i][j]):
 					B[i][j] = "|";
-					print("error: path is leading outside the band");
 				else:
 					print("error: cannot determine backtracing direction");
 				
@@ -924,32 +916,32 @@ def showLCSprocess(word1, word2):
 	return 0;
 
 def alignmentProcess(word1, word2):
-	"""print("Using Longest Common String:");
+	print("Using Longest Common String:"); #not accurate
 	edit = dynGrid(word1, word2);
 	tinyprintGrid(word1, word2, edit[0]);
-	shortPrintAlignment(word1, word2, edit[1]);"""
+	shortPrintAlignment(word1, word2, edit[1]);
 	
-	"""print("Using Smith-Waterman Alignment:");
+	print("Using Smith-Waterman Alignment:"); #accurate, but not what we need
 	smLocal = smithWatermanAlign(word1, word2);
 	#for row in smLocal[1]:
 		#print(row, "\t", word1[row[1]], word2[row[0]]);
 	tinyprintGrid(word1, word2, smLocal[0]);
-	shortPrintAlignment(word1, word2, smLocal[1]);"""
+	shortPrintAlignment(word1, word2, smLocal[1]);
 	
-	"""print("Using affine gap penalty:");
-	gap = affineGap(word1, word2);
+	print("Using affine gap penalty:"); #accuracy pass
+	gap = localAlignment(word1, word2);
 	tinyprintGrid(word1, word2, gap[0]);
-	shortPrintAlignment(word1, word2, gap[1]);"""
+	shortPrintAlignment(word1, word2, gap[1]);
 	
-	print("banding:");
+	print("banding:"); #not accurate
 	band1 = banding(word1, word2);
 	tinyprintGrid(word1, word2, band1[0]); 
 	shortPrintAlignment(word1, word2, band1[1]);
 	
-	"""print("banded global alignment:");
-	glob1 = globalAlign(word1, word2);
+	print("banded global alignment:"); #accuracy pass
+	glob1 = globalAlignment(word1, word2);
 	tinyprintGrid(word1, word2, glob1[0]);
-	shortPrintAlignment(word1, word2, glob1[1]);"""
+	shortPrintAlignment(word1, word2, glob1[1]);
 #-----high level function calls-------------
 
 #tinyprintGrid("ATCGTAC", "ATGTTAT", dynGrid("ATCGTAC", "ATGTTAT")[0]);
