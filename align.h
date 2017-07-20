@@ -4,15 +4,6 @@
 #include <string>
 #include <algorithm>    // std::max_element std::max std::find
 
-std::tuple<int, int> f(int a, int b, int c) //returns (sum, max) of three ints
-{
-    int x = a + b + c;
-    int y = a;
-    y = std::max(y, b);
-    y = std::max(y, c);
-    return std::make_tuple(x, y);
-}
-
 int maximum(int a, int b)
 {
     if(a > b)
@@ -23,7 +14,15 @@ int maximum(int a, int b)
 int maximum(int a, int b, int c)
 {return maximum(maximum(a,b), c);}
 
-
+int minimum(int a, int b)
+{
+    if(a < b)
+        {return a;}
+    else 
+        {return b;}
+}
+int minimum(int a, int b, int c)
+{return minimum(minimum(a,b), c);}
 
 const int Bindex[24][24] = {{4, -1, -2, -2, 0, -1, -1, 0, -2, -1, -1, -1, -1, -2, -1, 1, 0, -3, -2, 0, -2, -1, 0, -4},
 {-1, 5, 0, -2, -3, 1, 0, -2, 0, -3, -2, 2, -1, -3, -2, -1, -1, -3, -2, -3, -1, 0, -1, -4},
@@ -53,7 +52,6 @@ const int Bindex[24][24] = {{4, -1, -2, -2, 0, -1, -1, 0, -2, -1, -1, -1, -1, -2
 char vx[24] = {'A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V', 'B', 'Z', 'X', '-'};
 char wx[24] = {'A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V', 'B', 'Z', 'X', '-'};
 
-
 int DeltaBLOSUM(char i, char j)
 {
     //std::cout << "using blosum!" << std::endl;
@@ -80,43 +78,87 @@ int DeltaBLOSUM(char i, char j)
     return Bindex[f_v][f_w];
 }
 
-void print_vi_vector(std::vector<std::vector<int> > x)
+void shortPrintAlignment(std::string v,std::string w, std::vector<std::vector<int>> path)
 {
-	//std::cout << "target_addresses: ";
-	for(size_t i=0; i<x.size(); i++)
+	int offset = 60;
+	const std::string V = '-' + v;
+	const std::string W = '-' + w;
+	std::string top = ""; //W
+	std::string middle = ""; //relationship
+	std::string btm = ""; //V
+	std::vector<int> v1;
+	v1.push_back(0);
+	v1.push_back(1);
+	std::vector<int> v2;
+	v2.push_back(1);
+	v2.push_back(0);
+	if(path[1] == v1) //moved down. gap in W
 	{
-		std::cout << "{";
-        for(size_t j=0; j<x[i].size(); j++)
-        {
-            std::cout << x[i][j] << ", ";
-        }
-		std::cout << "}" << "\n";   
+		top = top + "-";
+		middle = middle + " ";
+		btm = btm + V[path[0][1]];
 	}
-	std::cout << "\n";
-    //std::cout << "test6" << std::endl;
-}
-
-void print_vs_vector(std::vector<std::vector<char> > x)
-{
-	for(size_t i=0; i<x.size(); i++)
+	else if( path[1] == v2 ) //moved left, gap in V
 	{
-		std::cout << "{";
-        for(size_t j=0; j<x[i].size(); j++)
-        {
-            std::cout << x[i][j] << ", ";
-        }
-		std::cout << "}" << "\n";   
+		top = top + W[path[0][0]];
+		middle = middle + " ";
+		btm = btm + "-";
 	}
-	std::cout << "\n";
+	else //moved diagonal, match or mismatch
+	{
+		top = top + W[path[0][0]];
+		if(W[path[0][0]]==V[path[0][1]])
+		{
+			middle = middle + "|";
+		}
+		else
+		{
+			middle = middle + "*";
+		}
+		btm = btm + V[path[0][1]];
+	}	
+	for (size_t i=1; i<path.size(); i++)
+	{
+		if(i%offset == 0)
+		{
+			std::cout << top << std::endl << middle << std::endl << btm << std::endl << std::endl;
+			top = "";
+			middle = "";
+			btm = "";
+		}
+		if(path[i][0]==path[i-1][0]) //we didn't move left.
+		{ 
+			top = top + "-";
+			middle = middle + " ";
+			btm = btm + V[path[i][1]];
+		}
+		else if(path[i][1]==path[i-1][1]) //we didn't move down
+		{
+			top = top + W[path[i][0]];
+			middle = middle + " ";
+			btm = btm + "-";
+		}
+		else //we moved diagonally
+		{
+			top = top + W[path[i][0]];
+			if(W[path[i][0]]==V[path[i][1]])
+			{
+				middle = middle + "|";
+			}
+			else
+			{
+				middle = middle + "*";
+			}
+			btm = btm + V[path[i][1]];
+		}
+		if(i == path.size()-1)
+		{
+			std::cout << top << std::endl << middle << std::endl << btm;
+		}
+	}
+	std::cout << std::endl << std::endl;
 }
 
-
-std::vector<std::vector<int>> twoVector(int n, int m)
-{
-    //std::vector<int> f_vector(m, 0);
-    std::vector<std::vector<int>> f_grid(n, std::vector<int>(m, 0));
-    return f_grid;
-}
 
 std::vector<std::vector<int>> bRecBacktrace(std::vector<std::vector<int>> s, std::string v, std::string w, std::vector<std::vector<char>> b, int x, int y, std::vector<std::vector<int>> CPath={})
 {
@@ -162,10 +204,46 @@ std::vector<std::vector<int>> bRecBacktrace(std::vector<std::vector<int>> s, std
 	return pathList;
 }
 
-std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>> grid(std::string y, std::string x)
+void print_vi_vector(std::vector<std::vector<int> > x)
 {
-    const std::string V = ' ' + y;
-    const std::string W = ' ' + x;
+	//std::cout << "target_addresses: ";
+	for(size_t i=0; i<x.size(); i++)
+	{
+		std::cout << "{";
+        for(size_t j=0; j<x[i].size(); j++)
+        {
+            std::cout << x[i][j] << ", ";
+        }
+		std::cout << "}" << "\n";   
+	}
+	std::cout << "\n";
+    //std::cout << "test6" << std::endl;
+}
+
+void print_vs_vector(std::vector<std::vector<char> > x)
+{
+	for(size_t i=0; i<x.size(); i++)
+	{
+		std::cout << "{";
+        for(size_t j=0; j<x[i].size(); j++)
+        {
+            std::cout << x[i][j] << ", ";
+        }
+		std::cout << "}" << "\n";   
+	}
+	std::cout << "\n";
+}
+
+std::vector<std::vector<int>> twoVector(int n, int m)
+{
+    std::vector<std::vector<int>> f_grid(n, std::vector<int>(m, 0));
+    return f_grid;
+}
+
+std::vector<std::vector<int>> localAlignment(std::string y, std::string x)
+{
+    const std::string V = " " + y;
+    const std::string W = " " + x;
     std::vector<std::vector<int>> S(V.length(), std::vector<int>(W.length(), 0));
     std::vector<std::vector<int>> L(V.length(), std::vector<int>(W.length(), 0));
     std::vector<std::vector<int>> U(V.length(), std::vector<int>(W.length(), 0));
@@ -230,23 +308,132 @@ std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>> grid(st
     }
     //std::cout << "test6" << std::endl;
     std::vector<std::vector<int>> ourPaths = bRecBacktrace(S, y, x, B, x.length(), y.length());
-    
     if(ourPaths.size() > 0)
     {ourPaths.erase(ourPaths.begin());}
-    return std::make_tuple(S, ourPaths);
+    //print_vi_vector(ourPaths);
+    shortPrintAlignment(y, x, ourPaths);
+    
+    return S;
 }
 
+std::vector<std::vector<int>> globalAlignment(std::string word1, std::string word2)
+{
+    const std::string V = " " + word1;
+    const std::string W = " " + word2;
+    std::vector<std::vector<int>> S(V.length(), std::vector<int>(W.length(), 0));
+    std::vector<std::vector<int>> L(V.length(), std::vector<int>(W.length(), 0));
+    std::vector<std::vector<int>> U(V.length(), std::vector<int>(W.length(), 0));
+	std::vector<std::vector<int>> F(V.length(), std::vector<int>(W.length(), 0));
+    std::vector<std::vector<char>> B(V.length(), std::vector<char>(W.length(), ' '));
+    const int a = 1;
+    const int p = 11;
+	//k is constant. we'll make it 3 for no particular reason.
+	int k = 3;
+
+	if(word2.length() > word1.length())
+	{
+		k = k + (word2.length() - word1.length());
+	}
+	else if(word2.length() < word1.length())
+	{
+		k = k + (word1.length() - word2.length());
+	}
+	const int N = word1.length();
+	const int M = word2.length();
+	//d is another constant chosen arbitrarily
+	const int d = 2;
+	
+	//for point [0][0]
+	L[0][0] = 0;
+	U[0][0] = 0;
+	S[0][0] = 0;
+	B[0][0] = ' ';
+	F[0][0] = 0;
+
+	for (size_t i=1; i< k+1; i++)
+	{
+		L[i][0] = 0;
+		U[i][0] = maximum((U[i-1][0] - a), (S[i-1][0]-(p+a)));
+		S[i][0] = U[i][0];
+		B[i][0] = '|';
+		F[i][0] = 0; //I have no idea what number these should be initialized to
+	}
+	for (size_t j=1; j< k+1; j++)
+	{
+		L[0][j] = maximum((L[0][j-1] - a), (S[0][j-1]-(p+a)));
+		U[0][j] = 0;
+		S[0][j] = L[0][j];
+		B[0][j] = '-';
+		F[0][j] = 0; //I have no idea what number these should be initialized to
+	}
+	for (size_t i=1; i< N+1; i++)
+	{
+		for (size_t j=maximum(1,i-k); j< minimum(M,i+k)+1; j++)
+		{
+			if((j-i)==k) //cannot use [i-1][j]
+			{
+				L[i][j] = maximum((L[i][j-1] - a), (S[i][j-1]-(p+a)));	
+				U[i][j] = 0;
+				S[i][j] = maximum((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), L[i][j]);
+				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])))
+					{B[i][j] = ('\\');}
+				else if(S[i][j] == L[i][j])
+					{B[i][j] = '-';}
+				else
+					{std::cout << "error: cannot determine backtracing direction1" << std::endl;}
+			}
+			else if((i-j)==k) //cannot use [i][j-1]
+			{
+				L[i][j] = 0;
+				U[i][j] = maximum((U[i-1][j] - a), (S[i-1][j]-(p+a)));
+				S[i][j] = maximum((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j]);
+				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])))
+					B[i][j] = ('\\');
+				else if(S[i][j] == U[i][j])
+					{B[i][j] = '|';}
+				else
+					{std::cout << "error: cannot determine backtracing direction2" << std::endl;}
+			}	
+			else //we're assuming this is inside the band
+			{
+				L[i][j] = maximum((L[i][j-1] - a), (S[i][j-1]-(p+a)));
+				U[i][j] = maximum((U[i-1][j] - a), (S[i-1][j]-(p+a)));
+				S[i][j] = maximum((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
+				if(S[i][j] == L[i][j])
+					{B[i][j] = '-';}
+				else if(S[i][j] == U[i][j])
+					{B[i][j] = '|';}
+				else if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])))
+					{B[i][j] = '\\';}
+				else
+					{std::cout << "error: cannot determine backtracing direction3  " << i << ", " << j << ", " << S[i][j] << ", " << L[i][j] << ", " << U[i][j] << ", "<< std::endl;}
+			}	 
+			if((i-j)>k)
+				{F[i][j] = maximum((F[i][j-1]-d),(F[i-1][j-1] + S[i][j]));}
+			else if((j-i)>k)
+				{F[i][j] = maximum((F[i-1][j]-d),(F[i-1][j-1] + S[i][j]));}
+			else
+				{F[i][j] = (F[i-1][j-1] + S[i][j]);}
+		}
+	}
+    std::vector<std::vector<int>> ourPaths = bRecBacktrace(S, word1, word2, B, word2.length(), word1.length());
+    if(ourPaths.size() > 0)
+    {ourPaths.erase(ourPaths.begin());}
+    //print_vi_vector(ourPaths);
+    shortPrintAlignment(word1, word2, ourPaths);
+	return (S);
+}	
 
 int main()
 {
-  auto t = f(1, 2, 3);
+	std::string s1 = "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR";
+	std::string s2 = "MVLSGEDKSNIKAAWGKIGGHGAEYGAEALERMFASFPTTKTYFPHFDVSHGSAQVKGHGKKVADALASAAGHLDDLPGALSALSDLHAHKLRVDPVNFKLLSHCLLVTLASHHPADFTPAVHASLDKFLASVSTVLTSKYR";
+	std::vector<std::vector<int>> myGrid = localAlignment(s1, s2);
   std::cout << "hello3" << std::endl;
-  std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>> myGrid = grid("hello", "there");
-  //std::cout << std::get<0>(t) << std::endl;
-  //std::cout << std::get<1>(t) << std::endl;
+  //std::vector<std::vector<int>> myGrid = grid("hello", "there");
   //std::vector<std::vector<int>> grid1 = twoVector(3,4);
+  std::vector<std::vector<int>> grid2 = globalAlignment(s1, s2);
   std::cout << "hello4" << std::endl;
-  print_vi_vector(std::get<0>(myGrid));
-  
+  //print_vi_vector(myGrid);
+  //shortPrintAlignment("hello", "there", std::get<1>(myGrid));
 }
-
