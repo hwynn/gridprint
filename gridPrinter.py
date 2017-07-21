@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import copy
+import sys
 
 #BLOSUM stuff
 vx = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V', 'B', 'Z', 'X', '-'];
@@ -338,9 +339,14 @@ def alignmentProcess(word1, word2):
 	shortPrintAlignment(word1, word2, glob1[1]);
 #-----high level function calls-------------
 
-#s1 = proteinFromFile("guitarfish1_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54580.1
-#s2 = proteinFromFile("guitarfish2_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54579.1
-s1 = "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR";
-s2 = "MVLSGEDKSNIKAAWGKIGGHGAEYGAEALERMFASFPTTKTYFPHFDVSHGSAQVKGHGKKVADALASAAGHLDDLPGALSALSDLHAHKLRVDPVNFKLLSHCLLVTLASHHPADFTPAVHASLDKFLASVSTVLTSKYR";
+print(sys.argv, len(sys.argv));
+if(len(sys.argv) > 2):
+	s1 = proteinFromFile(sys.argv[1]);
+	s2 = proteinFromFile(sys.argv[2]);
+else:	
+	#s1 = proteinFromFile("guitarfish1_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54580.1
+	#s2 = proteinFromFile("guitarfish2_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54579.1
+	s1 = "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR";
+	s2 = "MVLSGEDKSNIKAAWGKIGGHGAEYGAEALERMFASFPTTKTYFPHFDVSHGSAQVKGHGKKVADALASAAGHLDDLPGALSALSDLHAHKLRVDPVNFKLLSHCLLVTLASHHPADFTPAVHASLDKFLASVSTVLTSKYR";
 
 alignmentProcess(s1, s2);
