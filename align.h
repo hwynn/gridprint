@@ -422,18 +422,24 @@ std::vector<std::vector<int>> globalAlignment(std::string word1, std::string wor
     //print_vi_vector(ourPaths);
     shortPrintAlignment(word1, word2, ourPaths);
 	return (S);
-}	
+}
+
+void alignmentProcess(std::string word1, std::string word2)
+{
+	std::cout << "Using Local Alignment: " << std::endl;
+	std::vector<std::vector<int>> grid1 = localAlignment(word1, word2);
+	
+	std::cout << "Using Banded Global Alignment: " << std::endl;
+	std::vector<std::vector<int>> grid2 = globalAlignment(word1, word2);
+}
 
 int main()
 {
 	std::string s1 = "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR";
 	std::string s2 = "MVLSGEDKSNIKAAWGKIGGHGAEYGAEALERMFASFPTTKTYFPHFDVSHGSAQVKGHGKKVADALASAAGHLDDLPGALSALSDLHAHKLRVDPVNFKLLSHCLLVTLASHHPADFTPAVHASLDKFLASVSTVLTSKYR";
-	std::vector<std::vector<int>> myGrid = localAlignment(s1, s2);
-  std::cout << "hello3" << std::endl;
-  //std::vector<std::vector<int>> myGrid = grid("hello", "there");
-  //std::vector<std::vector<int>> grid1 = twoVector(3,4);
-  std::vector<std::vector<int>> grid2 = globalAlignment(s1, s2);
-  std::cout << "hello4" << std::endl;
-  //print_vi_vector(myGrid);
-  //shortPrintAlignment("hello", "there", std::get<1>(myGrid));
+	alignmentProcess(s1, s2);
+	
+	std::cout << "hello4" << std::endl;
+	//print_vi_vector(myGrid);
+	//shortPrintAlignment("hello", "there", std::get<1>(myGrid));
 }
