@@ -1,6 +1,5 @@
 // Example program
 #include <iostream>
-#include <tuple>
 #include <string>
 #include <fstream>
 #include <vector>
@@ -55,7 +54,6 @@ char wx[24] = {'A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 
 
 int DeltaBLOSUM(char i, char j)
 {
-	//std::cout << "using blosum!" << std::endl;
 	int f_v = 23;
 	int f_w = 23;
 	
@@ -75,7 +73,6 @@ int DeltaBLOSUM(char i, char j)
 			break;
 		}
 	}
-	//tstd::cout << f_v << " " << f_w << std::endl;
 	return Bindex[f_v][f_w];
 }
 
@@ -207,7 +204,6 @@ std::vector<std::vector<int>> bRecBacktrace(std::vector<std::vector<int>> s, std
 
 void print_vi_vector(std::vector<std::vector<int> > x)
 {
-	//std::cout << "target_addresses: ";
 	for(size_t i=0; i<x.size(); i++)
 	{
 		std::cout << "{";
@@ -218,7 +214,6 @@ void print_vi_vector(std::vector<std::vector<int> > x)
 		std::cout << "}" << "\n";   
 	}
 	std::cout << "\n";
-	//std::cout << "test6" << std::endl;
 }
 
 void print_vs_vector(std::vector<std::vector<char> > x)
@@ -251,63 +246,48 @@ std::vector<std::vector<int>> localAlignment(std::string y, std::string x)
 	std::vector<std::vector<char>> B(V.length(), std::vector<char>(W.length(), ' '));
 	const int a = 1;
 	const int p = 11;
-	//std::cout << "test1" << std::endl;
 	for (size_t i=0; i< V.length(); i++) //horizontal
 	{
-		//std::cout << "test2" << std::endl;
-		//S[y,x];
 		for (size_t j=0; j< W.length(); j++) //vertical
 		{
 			if(i==0 && j==0)
 			{
-				//std::cout << "test3a1" << ", i: " << i << ", j: "<< j << " " << W.length() <<std::endl;
 				L[i][j] = 0;
 				U[i][j] = 0;
 				S[i][j] = 0;
 				B[i][j] = ' ';
-				//std::cout << "test3a2" << ", i: " << i << ", j: "<< j << " " << W.length() << std::endl;
 			}
 			else if(j==0) //cannot use [i-1][j]
 			{
-				//std::cout << "test3b1" << ", i: " << i << ", j: "<< j << " " << W.length() << std::endl;
 				L[i][j] = 0;
 				U[i][j] = maximum((U[i-1][j] - a), (S[i-1][j]-(p+a)));
 				S[i][j] = U[i][j];
 				B[i][j] = '|';
-				//std::cout << "test3b2" << ", i: " << i << ", j: "<< j << " " << W.length() << std::endl;
 			}
 			else if(i==0) //cannot use [i][j-1]
 			{
-				//std::cout << "test3c1" << ", i: " << i << ", j: "<< j << " " << W.length() << std::endl;
 				L[i][j] = maximum((L[i][j-1] - a), (S[i][j-1]-(p+a)));
 				U[i][j] = 0;
 				S[i][j] = L[i][j];
 				B[i][j] = '-';
-				//std::cout << "test3c2" << ", i: " << i << ", j: "<< j << " " << W.length() << std::endl;
 			}
 			else
 			{	
-				//std::cout << "test3d1" << ", i: " << i << ", j: "<< j << " " << W.length() << std::endl;
 				//lower level. horizontal edges		gaps in w
 				L[i][j] = maximum((L[i][j-1] - a), (S[i][j-1]-(p+a)));
 				//upper level. vertical edges		gaps in v
 				U[i][j] = maximum((U[i-1][j] - a), (S[i-1][j]-(p+a)));
 				//main level. diagonal edges			matches/mismatches
 				S[i][j] = maximum((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
-				//std::cout << "test6" << std::endl;
 				if(S[i][j] == L[i][j])
 				{B[i][j] = '-';}
 				if(S[i][j] == U[i][j])
 				{B[i][j] = '|';}
 				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])))
 				{B[i][j] = '\\';}
-				//std::cout << "test3d2" << ", i: " << i << ", j: "<< j << " " << W.length() << std::endl;
 			}
-			//std::cout << "test5" << std::endl;
 		}
-		//std::cout << "test4" << std::endl;
 	}
-	//std::cout << "test6" << std::endl;
 	std::vector<std::vector<int>> ourPaths = bRecBacktrace(S, y, x, B, x.length(), y.length());
 	if(ourPaths.size() > 0)
 	{ourPaths.erase(ourPaths.begin());}
@@ -330,7 +310,6 @@ std::vector<std::vector<int>> globalAlignment(std::string word1, std::string wor
 	const int p = 11;
 	//k is constant. we'll make it 3 for no particular reason.
 	unsigned int k = 3;
-	//std::cout << "test4" << std::endl;
 	if(word2.length() > word1.length())
 	{
 		k = k + (word2.length() - word1.length());
@@ -343,44 +322,29 @@ std::vector<std::vector<int>> globalAlignment(std::string word1, std::string wor
 	unsigned const int M = word2.length();
 	//d is another constant chosen arbitrarily
 	const int d = 2;
-	//std::cout << "test5" << std::endl;
-	//for point [0][0]
 	L[0][0] = 0;
 	U[0][0] = 0;
 	S[0][0] = 0;
 	B[0][0] = ' ';
 	F[0][0] = 0;
-	//std::cout << "test60" << std::endl;
 	for (size_t i=1; i< k+1; i++)
 	{
-		//std::cout << "test61" << std::endl;
-		//std::cout << "test61 " << word1 << L.size() << std::endl;
-		//std::cout << "test71" << i << std::endl;
 		L[i][0] = 0;
-		//std::cout << "test71" << std::endl;
 		U[i][0] = maximum((U[i-1][0] - a), (S[i-1][0]-(p+a)));
-		//std::cout << "test72" << std::endl;
 		S[i][0] = U[i][0];
-		//std::cout << "test73" << std::endl;
 		B[i][0] = '|';
-		//std::cout << "test74" << std::endl;
 		F[i][0] = 0; //I have no idea what number these should be initialized to
-		//std::cout << "test61a" << std::endl;
 	}
-	//std::cout << "test62a" << std::endl;
 	for (size_t j=1; j< k+1; j++)
 	{
-		//std::cout << "test62" << std::endl;
 		L[0][j] = maximum((L[0][j-1] - a), (S[0][j-1]-(p+a)));
 		U[0][j] = 0;
 		S[0][j] = L[0][j];
 		B[0][j] = '-';
 		F[0][j] = 0; //I have no idea what number these should be initialized to
-		//std::cout << "test63" << std::endl;
 	}
 	for (size_t i=1; i< N+1; i++)
 	{
-		//std::cout << "test10" << std::endl;
 		for (size_t j=maximum(1,i-k); j< minimum(M,i+k)+1; j++)
 		{
 			if((j-i)==k) //cannot use [i-1][j]
@@ -427,16 +391,11 @@ std::vector<std::vector<int>> globalAlignment(std::string word1, std::string wor
 			{F[i][j] = maximum((F[i-1][j]-d),(F[i-1][j-1] + S[i][j]));}
 			else
 			{F[i][j] = (F[i-1][j-1] + S[i][j]);}
-			//std::cout << "test30" << std::endl;
 		}
-		//std::cout << "test40" << std::endl;
 	}
-	//std::cout << "test6" << std::endl;
 	std::vector<std::vector<int>> ourPaths = bRecBacktrace(S, word1, word2, B, word2.length(), word1.length());
-	//std::cout << "test7" << std::endl;
 	if(ourPaths.size() > 0)
 	{ourPaths.erase(ourPaths.begin());}
-	//std::cout << "test8" << std::endl;
 	//print_vi_vector(ourPaths);
 	shortPrintAlignment(word1, word2, ourPaths);
 	return (S);
@@ -484,8 +443,5 @@ int main ( int argc, char *argv[] )
 		s1 = "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR";
 		s2 = "MVLSGEDKSNIKAAWGKIGGHGAEYGAEALERMFASFPTTKTYFPHFDVSHGSAQVKGHGKKVADALASAAGHLDDLPGALSALSDLHAHKLRVDPVNFKLLSHCLLVTLASHHPADFTPAVHASLDKFLASVSTVLTSKYR";
 	}
-
 	alignmentProcess(s1, s2);
-	//print_vi_vector(myGrid);
-	//shortPrintAlignment("hello", "there", std::get<1>(myGrid));
 }
