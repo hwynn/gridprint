@@ -76,7 +76,7 @@ int DeltaBLOSUM(char i, char j)
 	return Bindex[f_v][f_w];
 }
 
-void shortPrintAlignment(std::string v,std::string w, std::vector<std::vector<int>> path)
+void shortPrintAlignment(std::string v,std::string w, std::vector<std::vector<int> > path)
 {
 	int offset = 60;
 	const std::string V = '-' + v;
@@ -158,11 +158,11 @@ void shortPrintAlignment(std::string v,std::string w, std::vector<std::vector<in
 }
 
 
-std::vector<std::vector<int>> bRecBacktrace(std::vector<std::vector<int>> s, std::string v, std::string w, std::vector<std::vector<char>> b, int x, int y, std::vector<std::vector<int>> CPath={})
+std::vector<std::vector<int> > bRecBacktrace(std::vector<std::vector<int> > s, std::string v, std::string w, std::vector<std::vector<char> > b, int x, int y, std::vector<std::vector<int> > CPath={})
 {
 	std::string V = ' ' + v;
 	std::string W = ' ' + w;
-	std::vector<std::vector<int>> pathList = CPath; //we will append the current position to this
+	std::vector<std::vector<int> > pathList = CPath; //we will append the current position to this
 	pathList.insert(pathList.begin(),{x,y});
 	if(x==0 && y==0)
 	{
@@ -230,20 +230,20 @@ void print_vs_vector(std::vector<std::vector<char> > x)
 	std::cout << "\n";
 }
 
-std::vector<std::vector<int>> twoVector(int n, int m)
+std::vector<std::vector<int> > twoVector(int n, int m)
 {
-	std::vector<std::vector<int>> f_grid(n, std::vector<int>(m, 0));
+	std::vector<std::vector<int> > f_grid(n, std::vector<int>(m, 0));
 	return f_grid;
 }
 
-std::vector<std::vector<int>> localAlignment(std::string y, std::string x)
+std::vector<std::vector<int> > localAlignment(std::string y, std::string x)
 {
 	const std::string V = " " + y;
 	const std::string W = " " + x;
-	std::vector<std::vector<int>> S(V.length(), std::vector<int>(W.length(), 0));
-	std::vector<std::vector<int>> L(V.length(), std::vector<int>(W.length(), 0));
-	std::vector<std::vector<int>> U(V.length(), std::vector<int>(W.length(), 0));
-	std::vector<std::vector<char>> B(V.length(), std::vector<char>(W.length(), ' '));
+	std::vector<std::vector<int> > S(V.length(), std::vector<int>(W.length(), 0));
+	std::vector<std::vector<int> > L(V.length(), std::vector<int>(W.length(), 0));
+	std::vector<std::vector<int> > U(V.length(), std::vector<int>(W.length(), 0));
+	std::vector<std::vector<char> > B(V.length(), std::vector<char>(W.length(), ' '));
 	const int a = 1;
 	const int p = 11;
 	for (size_t i=0; i< V.length(); i++) //horizontal
@@ -288,24 +288,25 @@ std::vector<std::vector<int>> localAlignment(std::string y, std::string x)
 			}
 		}
 	}
-	std::vector<std::vector<int>> ourPaths = bRecBacktrace(S, y, x, B, x.length(), y.length());
+	std::vector<std::vector<int> > ourPaths = bRecBacktrace(S, y, x, B, x.length(), y.length());
 	if(ourPaths.size() > 0)
 	{ourPaths.erase(ourPaths.begin());}
+	std::cout << ourPaths.size() << std::endl;
 	//print_vi_vector(ourPaths);
 	shortPrintAlignment(y, x, ourPaths);
 	
 	return S;
 }
 
-std::vector<std::vector<int>> globalAlignment(std::string word1, std::string word2)
+std::vector<std::vector<int> > globalAlignment(std::string word1, std::string word2)
 {
 	const std::string V = " " + word1;
 	const std::string W = " " + word2;
-	std::vector<std::vector<int>> S(V.length(), std::vector<int>(W.length(), 0));
-	std::vector<std::vector<int>> L(V.length(), std::vector<int>(W.length(), 0));
-	std::vector<std::vector<int>> U(V.length(), std::vector<int>(W.length(), 0));
-	std::vector<std::vector<int>> F(V.length(), std::vector<int>(W.length(), 0));
-	std::vector<std::vector<char>> B(V.length(), std::vector<char>(W.length(), ' '));
+	std::vector<std::vector<int> > S(V.length(), std::vector<int>(W.length(), 0));
+	std::vector<std::vector<int> > L(V.length(), std::vector<int>(W.length(), 0));
+	std::vector<std::vector<int> > U(V.length(), std::vector<int>(W.length(), 0));
+	std::vector<std::vector<int> > F(V.length(), std::vector<int>(W.length(), 0));
+	std::vector<std::vector<char> > B(V.length(), std::vector<char>(W.length(), ' '));
 	const int a = 1;
 	const int p = 11;
 	//k is constant. we'll make it 3 for no particular reason.
@@ -393,9 +394,10 @@ std::vector<std::vector<int>> globalAlignment(std::string word1, std::string wor
 			{F[i][j] = (F[i-1][j-1] + S[i][j]);}
 		}
 	}
-	std::vector<std::vector<int>> ourPaths = bRecBacktrace(S, word1, word2, B, word2.length(), word1.length());
+	std::vector<std::vector<int> > ourPaths = bRecBacktrace(S, word1, word2, B, word2.length(), word1.length());
 	if(ourPaths.size() > 0)
 	{ourPaths.erase(ourPaths.begin());}
+	std::cout << ourPaths.size() << std::endl;
 	//print_vi_vector(ourPaths);
 	shortPrintAlignment(word1, word2, ourPaths);
 	return (S);
@@ -404,28 +406,31 @@ std::vector<std::vector<int>> globalAlignment(std::string word1, std::string wor
 void alignmentProcess(std::string word1, std::string word2)
 {
 	std::cout << "Using Local Alignment: " << std::endl;
-	std::vector<std::vector<int>> grid1 = localAlignment(word1, word2);
+	std::vector<std::vector<int> > grid1 = localAlignment(word1, word2);
 	
 	std::cout << "Using Banded Global Alignment: " << std::endl;
-	std::vector<std::vector<int>> grid2 = globalAlignment(word1, word2);
+	std::vector<std::vector<int> > grid2 = globalAlignment(word1, word2);
 }
 
 std::string proteinFromFile(std::string filename)
 {
 	std::string sequence = "";
 	std::ifstream file (filename);
+	std::string line;
 	if (file.is_open())
 	{
-		std::string line;
-		getline(file, line);
+		getline(file, line, '\r');
 		line = "";
-		while(getline(file, line, '\n'))
+		while(getline(file, line, '\r'))
 		{
-			sequence = sequence + line;
+			sequence.append(line);
 		}
 	}
 	file.close();
-	return sequence;
+	for(int i=0; i<sequence.length(); i++)
+		if(sequence[i] == ' ' || sequence[i] == '\n' || sequence[i] == '\r' || sequence[i] == '\t') sequence.erase(i,1);
+		
+		return sequence;
 }
 
 int main ( int argc, char *argv[] )
@@ -440,8 +445,8 @@ int main ( int argc, char *argv[] )
 	else
 	{
 		std::cout << "No file given. Using sample protein sequences." << std::endl;
-		s1 = "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR";
-		s2 = "MVLSGEDKSNIKAAWGKIGGHGAEYGAEALERMFASFPTTKTYFPHFDVSHGSAQVKGHGKKVADALASAAGHLDDLPGALSALSDLHAHKLRVDPVNFKLLSHCLLVTLASHHPADFTPAVHASLDKFLASVSTVLTSKYR";
+		s1 = "LYFIFGAWAGLFGTGLSLLIRTELSQPGTLLGDDQIYNVVVTAHAFVMIFFMVMPIMIGGFGNWLVPLMIGAPDMAFPRMNNMSFWLLPPSFLLLLASAGVEAGAGTGWTVYPPLAGNLAHAGASVDLAIFSLHLAGISSILASINFITTIINMKPPAISQYQTPLFVWSILVTTVLLLLSLPVLAAGITMLLTDRNLNTTFFDPAGGGDPILYQHLFW";
+		s2 = "LYLIFVAWAGMVGTGLSLLIRTELSQPGTLLGDDQIYNVVVTAHAFVMIFFMVMPIMIGGFGNWLVPLMIGAPDMAFPRMNNMSFWLLPPSFLLLLASAGVEAGAGTGWTVYPPLAGNLAHAGASVDLAIFSLHLAGISSILASINFITTIINMKPPAISQYQTPLFVWSILVTTILLLLSLPVLAAGITMLLTDRNWNTTFFDPAGGGDPILYQ";
 	}
 	alignmentProcess(s1, s2);
 }

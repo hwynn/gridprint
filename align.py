@@ -331,12 +331,14 @@ def alignmentProcess(word1, word2):
 	print("Using Local Alignment:");
 	gap = localAlignment(word1, word2);
 	tinyprintGrid(word1, word2, gap[0]);
-	shortPrintAlignment(word1, word2, gap[1]);
+	print(gap[1]);
+	#shortPrintAlignment(word1, word2, gap[1]);
 
 	print("Using Banded Global Alignment:");
 	glob1 = globalAlignment(word1, word2);
 	tinyprintGrid(word1, word2, glob1[0]);
-	shortPrintAlignment(word1, word2, glob1[1]);
+	print(glob1[1]);
+	#shortPrintAlignment(word1, word2, glob1[1]);
 #-----high level function calls-------------
 
 print(sys.argv, len(sys.argv));
