@@ -238,12 +238,18 @@ std::vector<std::vector<int> > twoVector(int n, int m)
 
 std::vector<std::vector<int> > localAlignment(std::string y, std::string x)
 {
+
 	const std::string V = " " + y;
 	const std::string W = " " + x;
 	std::vector<std::vector<int> > S(V.length(), std::vector<int>(W.length(), 0));
 	std::vector<std::vector<int> > L(V.length(), std::vector<int>(W.length(), 0));
 	std::vector<std::vector<int> > U(V.length(), std::vector<int>(W.length(), 0));
 	std::vector<std::vector<char> > B(V.length(), std::vector<char>(W.length(), ' '));
+	if(y=="" || x=="")
+	{
+		std::cout << "Error: empty string given" << std::endl;
+		return S;
+	}
 	const int a = 1;
 	const int p = 11;
 	for (size_t i=0; i< V.length(); i++) //horizontal
@@ -291,7 +297,7 @@ std::vector<std::vector<int> > localAlignment(std::string y, std::string x)
 	std::vector<std::vector<int> > ourPaths = bRecBacktrace(S, y, x, B, x.length(), y.length());
 	if(ourPaths.size() > 0)
 	{ourPaths.erase(ourPaths.begin());}
-	std::cout << ourPaths.size() << std::endl;
+	//std::cout << "pathsize: " << ourPaths.size() << std::endl;
 	//print_vi_vector(ourPaths);
 	shortPrintAlignment(y, x, ourPaths);
 	
@@ -307,6 +313,11 @@ std::vector<std::vector<int> > globalAlignment(std::string word1, std::string wo
 	std::vector<std::vector<int> > U(V.length(), std::vector<int>(W.length(), 0));
 	std::vector<std::vector<int> > F(V.length(), std::vector<int>(W.length(), 0));
 	std::vector<std::vector<char> > B(V.length(), std::vector<char>(W.length(), ' '));
+	if(word1=="" || word2=="")
+	{
+		std::cout << "Error: empty string given" << std::endl;
+		return S;
+	}
 	const int a = 1;
 	const int p = 11;
 	//k is constant. we'll make it 3 for no particular reason.
@@ -331,13 +342,19 @@ std::vector<std::vector<int> > globalAlignment(std::string word1, std::string wo
 	for (size_t i=1; i< k+1; i++)
 	{
 		L[i][0] = 0;
+		
 		U[i][0] = maximum((U[i-1][0] - a), (S[i-1][0]-(p+a)));
+		
 		S[i][0] = U[i][0];
+		
 		B[i][0] = '|';
+		
 		F[i][0] = 0; //I have no idea what number these should be initialized to
+		
 	}
 	for (size_t j=1; j< k+1; j++)
 	{
+		
 		L[0][j] = maximum((L[0][j-1] - a), (S[0][j-1]-(p+a)));
 		U[0][j] = 0;
 		S[0][j] = L[0][j];
@@ -346,6 +363,7 @@ std::vector<std::vector<int> > globalAlignment(std::string word1, std::string wo
 	}
 	for (size_t i=1; i< N+1; i++)
 	{
+		
 		for (size_t j=maximum(1,i-k); j< minimum(M,i+k)+1; j++)
 		{
 			if((j-i)==k) //cannot use [i-1][j]
@@ -392,12 +410,15 @@ std::vector<std::vector<int> > globalAlignment(std::string word1, std::string wo
 			{F[i][j] = maximum((F[i-1][j]-d),(F[i-1][j-1] + S[i][j]));}
 			else
 			{F[i][j] = (F[i-1][j-1] + S[i][j]);}
+			
 		}
+		
 	}
+	
 	std::vector<std::vector<int> > ourPaths = bRecBacktrace(S, word1, word2, B, word2.length(), word1.length());
 	if(ourPaths.size() > 0)
 	{ourPaths.erase(ourPaths.begin());}
-	std::cout << ourPaths.size() << std::endl;
+	//std::cout << "pathsize: " << ourPaths.size() << std::endl;
 	//print_vi_vector(ourPaths);
 	shortPrintAlignment(word1, word2, ourPaths);
 	return (S);
@@ -420,17 +441,29 @@ std::string proteinFromFile(std::string filename)
 	if (file.is_open())
 	{
 		getline(file, line, '\r');
+		for(size_t i=0; i<line.length(); i++) //checking to see if getline accidently picked up entire file
+			if(line[i] == '\n')
+			{
+				sequence = line.substr(i, line.length());
+				break;
+			}
 		line = "";
 		while(getline(file, line, '\r'))
 		{
+			//std::cout << "line: " << line << std::endl;
 			sequence.append(line);
+			//std::cout << "sequence: " << sequence << std::endl;
 		}
 	}
+	else
+	{
+		std::cout << "Error: file could not be opened" << sequence << std::endl;
+	}
 	file.close();
-	for(int i=0; i<sequence.length(); i++)
+	for(size_t i=0; i<sequence.length(); i++)
 		if(sequence[i] == ' ' || sequence[i] == '\n' || sequence[i] == '\r' || sequence[i] == '\t') sequence.erase(i,1);
-		
-		return sequence;
+	//std::cout << "sequence: " << sequence << std::endl;
+	return sequence;
 }
 
 int main ( int argc, char *argv[] )
