@@ -324,6 +324,49 @@ def tinyprintGrid(v, w, s):
 	print("=", str(s[len(V)-1][-1]).center(3," "), "=",sep="");
 	return 0;
 
+def printSubGrid(v, w, s, v1, vL, w1, wL):
+	#w has maximum size of 14
+	
+	if(wL>14):
+		print("Sorry. I can't print a grid of this. It's too big.");
+		return 0;
+	V = [" "]+list(v);
+	W = [" "]+list(w);
+	if((v1+vL)>len(V) or (w1+wL)>len(w)):
+		print("Error: this exceeds the bounds of the grid");
+		return 0;
+	print(" "*5, end="");
+	for j in range(w1, w1+wL-1):
+		#print W
+		if(j==0):
+			print("W", " "*4, sep="", end="");
+		else:
+			print(W[j], " "*4, sep="", end="");
+	print(W[w1+wL]);
+	print("");
+	for i in range(v1, v1+vL):
+		#print V
+		if(i==0):
+			print("V", " "*2, sep="", end="");
+		else:
+			print(V[i], " "*2, sep="", end="");
+		#print row
+		for j in range(w1, w1+wL):
+			('[{n}]'.format(n=str(s[i][j]).center(3," ")));
+			print("=", str(s[i][j]).center(3," "), "=", sep="", end="");
+		print("");
+		#print down
+		print(" "*4," "*1, sep="", end="");
+		for j in range(w1, w1+wL-1):
+			if(W[j+1]==V[i+1]):
+				print('|', " ","\\"," "*2, sep="", end="");
+			else:
+				print('|', " "*4, sep="", end="");
+		print('|');
+	#print last row
+	
+	return 0;
+
 #----operation running functions-----------
 
 
@@ -331,14 +374,15 @@ def alignmentProcess(word1, word2):
 	print("Using Local Alignment:");
 	gap = localAlignment(word1, word2);
 	tinyprintGrid(word1, word2, gap[0]);
-	print(gap[1]);
-	#shortPrintAlignment(word1, word2, gap[1]);
+	#printSubGrid(word1, word2, gap[0], 2, 5, 2,5);
+	#print(gap[1]);
+	shortPrintAlignment(word1, word2, gap[1]);
 
 	print("Using Banded Global Alignment:");
 	glob1 = globalAlignment(word1, word2);
 	tinyprintGrid(word1, word2, glob1[0]);
-	print(glob1[1]);
-	#shortPrintAlignment(word1, word2, glob1[1]);
+	#print(glob1[1]);
+	shortPrintAlignment(word1, word2, glob1[1]);
 #-----high level function calls-------------
 
 print(sys.argv, len(sys.argv));
@@ -348,7 +392,7 @@ if(len(sys.argv) > 2):
 else:	
 	#s1 = proteinFromFile("guitarfish1_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54580.1
 	#s2 = proteinFromFile("guitarfish2_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54579.1
-	s1 = "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR";
+	s1 = "LYFIFGAWAGLFGTGLSLLIRTELSQPGTLLGDDQIYNVVVTAHAFVMIFFMVMPIMIGGFGNWLVPLMIGAPDMAFPRMNNMSFWLLPPSFLLLLASAGVEAGAGTGWTVYPPLAGNLAHAGASVDLAIFSLHLAGISSILASINFITTIINMKPPAISQYQTPLFVWSILVTTVLLLLSLPVLAAGITMLLTDRNLNTTFFDPAGGGDPILYQHLFW";
 	s2 = "MVLSGEDKSNIKAAWGKIGGHGAEYGAEALERMFASFPTTKTYFPHFDVSHGSAQVKGHGKKVADALASAAGHLDDLPGALSALSDLHAHKLRVDPVNFKLLSHCLLVTLASHHPADFTPAVHASLDKFLASVSTVLTSKYR";
 
 alignmentProcess(s1, s2);
