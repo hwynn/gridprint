@@ -51,100 +51,218 @@ def proteinFromFile(filename):
 
 #----recursive traceback algorithms-------------
 
-def bRecBacktrace(s, v, w, b, x, y, CPath=[]):
+def bRecBacktrace(s, v, w, bs, bu, bl, x, y, mode, CPath=[]):
 	V = [" "]+list(v);
 	W = [" "]+list(w);
 	pathList = copy.deepcopy(CPath); #we will append the current position to this
 	pathList.append([x, y]);
-	if(x==0 and y==0):
-		return pathList;
-	elif(x==0):
-		if(b[y][x] == "|"):		#did we come from above?
-			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x, y-1, pathList));
+	if(mode=="s"):
+		if(x==0 and y==0):
+			return pathList;
+		elif(x==0):
+			if(bs[y][x] == "|"):		#did we come from above?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, "u", pathList));
+			else:
+				print("error: cannot traceback above");
+			if(bs[y][x] == "\\"):	#did we come diagonally?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, "s", pathList));
+		elif(y==0):
+			if(bs[y][x] == "-"):		#did we come from the left?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, "l", pathList));
+			else:
+				print("error: cannot traceback left");
+			if(bs[y][x] == "\\"):	#did we come diagonally?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, "s", pathList));
+		elif(y<1 or x<1):
+			print("error: unidentified traceback error");
 		else:
-			print("error: cannot traceback above");
-		if(b[y][x] == "\\"):	#did we come diagonally?
-			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y-1, pathList));
-	elif(y==0):
-		if(b[y][x] == "-"):		#did we come from the left?
-			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y, pathList));
+			if(bs[y][x] == "|"):		#did we come from above?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, "u", pathList));
+			if(bs[y][x] == "-"):		#did we come from the left?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, "l", pathList));		
+			if(bs[y][x] == "\\"):	#did we come diagonally?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, "s", pathList));
+			if(bs[y][x] == " "):
+				print("error: blank cell in traceback");
+	elif(mode=="l"):
+		if(x==0 and y==0):
+			return pathList;
+		elif(x==0):
+			if(bl[y][x] == "|"):		#did we come from above?
+				print("error: this shouldn't happen");
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, "u", pathList));
+			else:
+				print("error: cannot traceback above");
+			if(bl[y][x] == "\\"):	#did we come diagonally?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, "s", pathList));
+		elif(y==0):
+			if(bl[y][x] == "-"):		#did we come from the left?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, "l", pathList));
+			else:
+				print("error: cannot traceback left");
+			if(bl[y][x] == "\\"):	#did we come diagonally?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, "s", pathList));
+		elif(y<1 or x<1):
+			print("error: unidentified traceback error");
 		else:
-			print("error: cannot traceback left");
-		if(b[y][x] == "\\"):	#did we come diagonally?
-			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y-1, pathList));
-	elif(y<1 or x<1):
-		print("error: unidentified traceback error");
-	else:
-		if(b[y][x] == "|"):		#did we come from above?
-			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x, y-1, pathList));
-		if(b[y][x] == "-"):		#did we come from the left?
-			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y, pathList));		
-		if(b[y][x] == "\\"):	#did we come diagonally?
-			pathList = copy.deepcopy(bRecBacktrace(s, v, w, b, x-1, y-1, pathList));
+			if(bl[y][x] == "|"):		#did we come from above?
+				print("error: this shouldn't happen");
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, "u", pathList));
+			if(bl[y][x] == "-"):		#did we come from the left?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, "l", pathList));		
+			if(bl[y][x] == "\\"):	#did we come diagonally?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, "s", pathList));
+			if(bl[y][x] == " "):
+				print("error: blank cell in traceback");
+			
+	elif(mode=="u"):
+		if(x==0 and y==0):
+			return pathList;
+		elif(x==0):
+			if(bu[y][x] == "|"):		#did we come from above?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, "u", pathList));
+			else:
+				print("error: cannot traceback above");
+			if(bu[y][x] == "\\"):	#did we come diagonally?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, "s", pathList));
+		elif(y==0):
+			if(bu[y][x] == "-"):		#did we come from the left?
+				print("error: this shouldn't happen");
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, "l", pathList));
+			else:
+				print("error: cannot traceback left");
+			if(bu[y][x] == "\\"):	#did we come diagonally?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, "s", pathList));
+		elif(y<1 or x<1):
+			print("error: unidentified traceback error");
+		else:
+			if(bu[y][x] == "|"):		#did we come from above?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, "u", pathList));
+			if(bu[y][x] == "-"):		#did we come from the left?
+				print("error: this shouldn't happen");
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, "l", pathList));		
+			if(bu[y][x] == "\\"):	#did we come diagonally?
+				pathList = copy.deepcopy(bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, "s", pathList));
+			if(bu[y][x] == " "):
+				print("error: blank cell in traceback");
+				
 	return copy.deepcopy(pathList);
 
-#----grid navigating algorithms-----------------------
-
+#----grid navigating algorithms-----------------------	
+	
 def localAlignment(y, x):
 	V = [" "]+list(y);
 	W = [" "]+list(x);
 	S = [];
 	L = [];
 	U = [];
-	B = [];
+	Bs = [];
+	Bl = [];
+	Bu = [];
 	a = 1;
 	p = 11;
 	S.append(([None]*(len(W))));
 	L.append(([None]*(len(W))));
 	U.append(([None]*(len(W))));
-	B.append(([None]*(len(W))));
+	Bs.append(([None]*(len(W))));
+	Bl.append(([None]*(len(W))));
+	Bu.append(([None]*(len(W))));
 	for i in range(len(V)-1):
 		S.append([None]*(len(W)));
 		L.append([None]*(len(W)));
 		U.append([None]*(len(W)));
-		B.append([None]*(len(W)));
+		Bs.append([None]*(len(W)));
+		Bl.append(([None]*(len(W))));
+		Bu.append(([None]*(len(W))));
 	for i in range(len(V)): #horizontal
 		#S[y,x];
 		for j in range(len(W)): #vertical
 			if(i==0 and j==0):
-				L[i][j] = 0;
-				U[i][j] = 0;
-				S[i][j] = 0;
-				B[i][j] = " ";
+				L[i][j]=0;
+				U[i][j]=0;
+				S[i][j]=0;
+				Bl[i][j]=" ";
+				Bu[i][j]=" ";
+				Bs[i][j]=" ";
 			elif(i==0 or j==0):
 				if(j==0): #cannot use [i-1][j]
-					L[i][j] = 0;
+					L[i][j]=0;
+					Bl[i][j]=" ";
 					if(i==1):
 						U[i][j] = (S[i-1][j]-(p+a));
 					else:
 						U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
-					S[i][j] = U[i][j];
-					B[i][j] = "|";
+					Bu[i][j] = "|";
+					S[i][j]=U[i][j];
+					Bs[i][j] = "|";
 				elif(i==0): #cannot use [i][j-1]
+					U[i][j]=0;
+					Bu[i][j]=" ";
 					if(j==1):
 						L[i][j] = (S[i][j-1]-(p+a));
 					else:
 						L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
-					U[i][j] = 0;
-					S[i][j] = L[i][j];
-					B[i][j] = "-"; 
-			else:
-				#lower level. horizontal edges		gaps in w
-				L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
-				#upper level. vertical edges		gaps in v
-				U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
-				#main level. diagonal edges			matches/mismatches
+					Bl[i][j]="-";
+					S[i][j]=L[i][j];
+					Bs[i][j] = "-";
+						
+			else: 
+				#finding L
+				if(Bl[i][j-1]==" "):
+					L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bl[i][j] ="\\";
+				elif(Bl[i][j-1]=="\\"):
+					L[i][j] = (S[i][j-1]-(p+a));
+					Bl[i][j] = "-";
+				elif(Bl[i][j-1]=="-"):
+					L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
+					Bl[i][j] = "-";
+				else:
+					print("Error: no direction for l found");
+				#check if diagonal is good enough to change our minds;
+				if(((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))-L[i][j])>=12):
+					L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bl[i][j] = "\\";
+				
+				#finding U
+				if(Bu[i-1][j]==" "):
+					U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bu[i][j] = "\\";
+				elif(Bu[i-1][j]=="\\"):
+					U[i][j] = (S[i-1][j]-(p+a));
+					Bu[i][j] = "|";
+				elif(Bu[i-1][j]=="|"):
+					U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
+					Bu[i][j] = "|";
+				else:
+					print("Error: no direction for u found");
+				#check if diagonal is good enough to change our minds;
+				if(((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))-U[i][j])>=12):
+					U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bu[i][j] = "\\";
+				
+				if((i==(len(V)-1) and j!=(len(W)-1)) or (i!=(len(V)-1) and j==(len(W)-1))):
+					if(i==(len(V)-1)):
+						U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+						Bu[i][j] = "\\";
+					elif(j==(len(W)-1)):
+						L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+						Bl[i][j] ="\\";
+					else:
+						print("Error: no direction for endzone found");
+
 				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
 				if(S[i][j] == L[i][j]):
-					B[i][j] = "-";
+					Bs[i][j] = "-";
 				if(S[i][j] == U[i][j]):
-					B[i][j] = "|";
+					Bs[i][j] = "|";
 				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
-					B[i][j] = "\\";
-	ourPaths = bRecBacktrace(S, y, x, B, len(x),len(y));
+					Bs[i][j] = "\\";
+	ourPaths = bRecBacktrace(S, y, x, Bs, Bu, Bl,len(x),len(y), "s");
+	
 	del ourPaths[-1];
 	ourPaths.reverse();
-	
+
 	return (S, ourPaths);
 
 def globalAlignment(word1, word2):
@@ -427,13 +545,13 @@ def pathCheck(word1, word2, path, grid=[[0]]):
 	return score;
 #----operation running functions-----------
 
-
 def alignmentProcess(word1, word2):
 	print("Using Local Alignment:");
 	gap = localAlignment(word1, word2);
 	tinyprintGrid(word1, word2, gap[0]);
 	#printSubGrid(word1, word2, gap[0], 2, 5, 2,5);
 	#print(gap[1]);
+	print(gap[0][len(word1)][len(word2)]);
 	shortPrintAlignment(word1, word2, gap[1]);
 
 	#print("Using Banded Global Alignment:");
@@ -450,7 +568,14 @@ if(len(sys.argv) > 2):
 else:	
 	#s1 = proteinFromFile("guitarfish1_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54580.1
 	#s2 = proteinFromFile("guitarfish2_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54579.1
-	s1 = "LYFIF";
-	s2 = "MVLSGE";
+	#s1 = "LYFIFGAWAGLFGTGLSLLIRTELSQPGTLLGDDQIYNVVVTAHA";
+	#s2 = "MVLSPADKTNVKAAWGKVGAHA";
+	#s1 = "LYFI";
+	#s2 = "MVLSGE";
+	#s1 = "LYFIFGAWAGLFGTGLSLLIRTELSQPGTLLGDDQIYNVVV";
+	#s2 = "MVLSPADKTNVKAAWGKVG";
+	s1 = "LYFIFGAWAGLFGTGLSLLIRTELSQPGTLLGDDQIYNVVVTAHAFVMIFFMVMPIMIGG";
+	s2 = "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHG";
+
 
 alignmentProcess(s1, s2);
