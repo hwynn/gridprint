@@ -111,16 +111,23 @@ def localAlignment(y, x):
 				U[i][j] = 0;
 				S[i][j] = 0;
 				B[i][j] = " ";
-			elif(j==0): #cannot use [i-1][j]
-				L[i][j] = 0;
-				U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
-				S[i][j] = U[i][j];
-				B[i][j] = "|";
-			elif(i==0): #cannot use [i][j-1]
-				L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
-				U[i][j] = 0;
-				S[i][j] = L[i][j];
-				B[i][j] = "-";
+			elif(i==0 or j==0):
+				if(j==0): #cannot use [i-1][j]
+					L[i][j] = 0;
+					if(i==1):
+						U[i][j] = (S[i-1][j]-(p+a));
+					else:
+						U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
+					S[i][j] = U[i][j];
+					B[i][j] = "|";
+				elif(i==0): #cannot use [i][j-1]
+					if(j==1):
+						L[i][j] = (S[i][j-1]-(p+a));
+					else:
+						L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
+					U[i][j] = 0;
+					S[i][j] = L[i][j];
+					B[i][j] = "-"; 
 			else:
 				#lower level. horizontal edges		gaps in w
 				L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
@@ -367,6 +374,57 @@ def printSubGrid(v, w, s, v1, vL, w1, wL):
 	
 	return 0;
 
+def pathCheck(word1, word2, path, grid=[[0]]):
+	if (path[-1][0]!=len(word2) and path[-1][1]!=len(word1)):
+		return 0;
+
+	V = [" "]+list(word1);
+	W = [" "]+list(word2);
+	vGap = False; #flags to tell us if gaps have been started yet.
+	wGap = False;
+	a = 1;
+	p = 11;
+	score = 0;
+	current = [0,0];
+	next = [0,0];
+	while(len(path)!=0):
+		current = copy.deepcopy(next);
+		next = copy.deepcopy(path[0]);
+		del path[0];
+		#diagonal
+		if(next[0]==(current[0]+1) and next[1]==(current[1]+1)):
+			score = score + DeltaBLOSUM(V[next[1]], W[next[0]]);
+			#print(current, "->", next);
+			vGap = False;
+			wGap = False;
+		#right
+		elif(next[0]==(current[0]+1) and next[1]==(current[1])):
+			if(wGap):
+				#print("W gap extension", current, "->", next);
+				score = score - (a);
+				vGap = False;
+			else:
+				#print("W gap start", current, "->", next);
+				score = score - (a+p);
+				wGap = True;
+				vGap = False;
+		#down
+		elif(next[0]==(current[0]) and next[1]==(current[1]+1)):
+			if(vGap):
+				#print("V gap extension", current, "->", next);
+				score = score - (a);
+				wGap = False;
+			else:
+				#print("V gap start", current, "->", next);
+				score = score - (a+p);
+				vGap = True;
+				wGap = False;
+		else:
+			print("Error: next cell in path could not be located");
+		#if(len(grid)!=1):
+			#if(score!=grid[next[1]][next[0]]):
+				#print("Incorrect score", next, grid[next[1]][next[0]], "should be:", score);
+	return score;
 #----operation running functions-----------
 
 
@@ -378,11 +436,11 @@ def alignmentProcess(word1, word2):
 	#print(gap[1]);
 	shortPrintAlignment(word1, word2, gap[1]);
 
-	print("Using Banded Global Alignment:");
-	glob1 = globalAlignment(word1, word2);
-	tinyprintGrid(word1, word2, glob1[0]);
+	#print("Using Banded Global Alignment:");
+	#glob1 = globalAlignment(word1, word2);
+	#tinyprintGrid(word1, word2, glob1[0]);
 	#print(glob1[1]);
-	shortPrintAlignment(word1, word2, glob1[1]);
+	#shortPrintAlignment(word1, word2, glob1[1]);
 #-----high level function calls-------------
 
 print(sys.argv, len(sys.argv));
@@ -392,7 +450,7 @@ if(len(sys.argv) > 2):
 else:	
 	#s1 = proteinFromFile("guitarfish1_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54580.1
 	#s2 = proteinFromFile("guitarfish2_cytochrome_c_oxidase_subunit1.fasta.txt"); #AHH54579.1
-	s1 = "LYFIFGAWAGLFGTGLSLLIRTELSQPGTLLGDDQIYNVVVTAHAFVMIFFMVMPIMIGGFGNWLVPLMIGAPDMAFPRMNNMSFWLLPPSFLLLLASAGVEAGAGTGWTVYPPLAGNLAHAGASVDLAIFSLHLAGISSILASINFITTIINMKPPAISQYQTPLFVWSILVTTVLLLLSLPVLAAGITMLLTDRNLNTTFFDPAGGGDPILYQHLFW";
-	s2 = "MVLSGEDKSNIKAAWGKIGGHGAEYGAEALERMFASFPTTKTYFPHFDVSHGSAQVKGHGKKVADALASAAGHLDDLPGALSALSDLHAHKLRVDPVNFKLLSHCLLVTLASHHPADFTPAVHASLDKFLASVSTVLTSKYR";
+	s1 = "LYFIF";
+	s2 = "MVLSGE";
 
 alignmentProcess(s1, s2);
