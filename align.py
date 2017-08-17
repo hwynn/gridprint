@@ -185,7 +185,7 @@ def localAlignment(y, x):
 				Bu[i][j]=" ";
 				Bs[i][j]=" ";
 			elif(i==0 or j==0):
-				if(j==0): #cannot use [i-1][j]
+				if(j==0):
 					L[i][j]=0;
 					Bl[i][j]=" ";
 					if(i==1):
@@ -195,7 +195,7 @@ def localAlignment(y, x):
 					Bu[i][j] = "|";
 					S[i][j]=U[i][j];
 					Bs[i][j] = "|";
-				elif(i==0): #cannot use [i][j-1]
+				elif(i==0):
 					U[i][j]=0;
 					Bu[i][j]=" ";
 					if(j==1):
@@ -271,8 +271,9 @@ def globalAlignment(word1, word2):
 	S =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
 	L =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
 	U =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
-	F =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
-	B =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
+	Bl =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
+	Bu =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
+	Bs =[[ None for i in range(len(word2)+1)] for i in range(len(word1)+1) ];
 	a = 1;
 	p = 11;
 	#k is constant. we'll make it 3 for no particular reason.
@@ -283,74 +284,100 @@ def globalAlignment(word1, word2):
 		k = k + (len(word1) - len(word2));
 	N = len(word1);
 	M = len(word2);
-	#d is another constant chosen arbitrarily
-	d = 2;
 	#for point [0][0]
 	L[0][0] = 0;
 	U[0][0] = 0;
 	S[0][0] = 0;
-	B[0][0] = " ";
-	F[0][0] = 0;
-
+	Bl[0][0] = " ";
+	Bu[0][0] = " ";
+	Bs[0][0] = " ";
 	for i in range(1,k+1):
-		L[i][0] = 0;
-		U[i][0] = max((U[i-1][0] - a), (S[i-1][0]-(p+a)));
-		S[i][0] = U[i][0];
-		B[i][0] = "|";
-		F[i][0] = 0; #I have no idea what number these should be initialized to
+		L[i][0]=0;
+		Bl[i][0]=" ";
+		if(i==1):
+			U[i][0] = (S[i-1][0]-(p+a));
+		else:
+			U[i][0] = max((U[i-1][0] - a), (S[i-1][0]-(p+a)));
+		Bu[i][0] = "|";
+		S[i][0]=U[i][0];
+		Bs[i][0] = "|";
 	for j in range(1,k+1):
-		L[0][j] = max((L[0][j-1] - a), (S[0][j-1]-(p+a)));
-		U[0][j] = 0;
-		S[0][j] = L[0][j];
-		B[0][j] = "-";
-		F[0][j] = 0; #I have no idea what number these should be initialized to
+		U[0][j]=0;
+		Bu[0][j]=" ";
+		if(j==1):
+			L[0][j] = (S[0][j-1]-(p+a));
+		else:
+			L[0][j] = max((L[0][j-1] - a), (S[0][j-1]-(p+a)));
+		Bl[0][j]="-";
+		S[0][j]=L[0][j];
+		Bs[0][j] = "-";
 	for i in range(1,N+1):
 		for j in range(max(1,i-k),min(M,i+k)+1):
+			#...
 			if((j-i)==k): #cannot use [i-1][j]
-				L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));	
-				U[i][j] = 0;
-				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), L[i][j]);
-				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
-					B[i][j] = ('\\');
-				elif(S[i][j] == L[i][j]):
-					B[i][j] = "-";
-				else:
-					print("error: cannot determine backtracing direction");
-			elif((i-j)==k): #cannot use [i][j-1]
-				L[i][j] = 0;
-				U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
-				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j]);
-				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
-					B[i][j] = ('\\');
-				elif(S[i][j] == U[i][j]):
-					B[i][j] = "|";
-				else:
-					print("error: cannot determine backtracing direction");
-				
-			else: #we're assuming this is inside the band
-				L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
-				U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
-				S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
-				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
-					B[i][j] = ('\\');
-				elif(S[i][j] == L[i][j]):
-					B[i][j] = "-";
-				elif(S[i][j] == U[i][j]):
-					B[i][j] = "|";
-				else:
-					print("error: cannot determine backtracing direction");
-				
-			if((i-j)>k):
-				F[i][j] = max((F[i][j-1]-d),(F[i-1][j-1] + S[i][j]));
-			elif((j-i)>k):
-				F[i][j] = max((F[i-1][j]-d),(F[i-1][j-1] + S[i][j]));
+				U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+				Bu[i][j] = "\\";
 			else:
-				F[i][j] = (F[i-1][j-1] + S[i][j]);
-	
-	ourPaths = bRecBacktrace(S, word1, word2, B, len(word2),len(word1));
+				#finding U
+				if(Bu[i-1][j]==" "):
+					U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bu[i][j] = "\\";
+				elif(Bu[i-1][j]=="\\"):
+					U[i][j] = (S[i-1][j]-(p+a));
+					Bu[i][j] = "|";
+				elif(Bu[i-1][j]=="|"):
+					U[i][j] = max((U[i-1][j] - a), (S[i-1][j]-(p+a)));
+					Bu[i][j] = "|";
+				else:
+					print("Error: no direction for u found");
+				#check if diagonal is good enough to change our minds;
+				if(((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))-U[i][j])>=12):
+					U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bu[i][j] = "\\";
+			#...
+			if((i-j)==k): #cannot use [i][j-1]
+				L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+				Bl[i][j] ="\\";
+			else:
+				#finding L
+				if(Bl[i][j-1]==" "):
+					L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bl[i][j] ="\\";
+				elif(Bl[i][j-1]=="\\"):
+					L[i][j] = (S[i][j-1]-(p+a));
+					Bl[i][j] = "-";
+				elif(Bl[i][j-1]=="-"):
+					L[i][j] = max((L[i][j-1] - a), (S[i][j-1]-(p+a)));
+					Bl[i][j] = "-";
+				else:
+					print("Error: no direction for l found");
+				#check if diagonal is good enough to change our minds;
+				if(((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))-L[i][j])>=12):
+					L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bl[i][j] = "\\";
+			
+			#are we on the edge of the grids?
+			if((i==(len(V)-1) and j!=(len(W)-1)) or (i!=(len(V)-1) and j==(len(W)-1))):
+				if(i==(len(V)-1)):
+					U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bu[i][j] = "\\";
+				elif(j==(len(W)-1)):
+					L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bl[i][j] ="\\";
+				else:
+					print("Error: no direction for endzone found");
+
+			S[i][j] = max((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
+			if(S[i][j] == L[i][j]):
+				Bs[i][j] = "-";
+			if(S[i][j] == U[i][j]):
+				Bs[i][j] = "|";
+			if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))):
+				Bs[i][j] = "\\";
+	ourPaths = bRecBacktrace(S, word1, word2, Bs, Bu, Bl,len(word2),len(word1), "s");
 	del ourPaths[-1];
 	ourPaths.reverse();
-	return (S, ourPaths, F);
+	return (S, ourPaths);
 		
 #---printing/displaying functions--------------------
 
@@ -554,11 +581,13 @@ def alignmentProcess(word1, word2):
 	print(gap[0][len(word1)][len(word2)]);
 	shortPrintAlignment(word1, word2, gap[1]);
 
-	#print("Using Banded Global Alignment:");
-	#glob1 = globalAlignment(word1, word2);
-	#tinyprintGrid(word1, word2, glob1[0]);
+	print("Using Banded Global Alignment:");
+	glob1 = globalAlignment(word1, word2);
+	tinyprintGrid(word1, word2, glob1[0]);
 	#print(glob1[1]);
 	#shortPrintAlignment(word1, word2, glob1[1]);
+	print(glob1[0][len(word1)][len(word2)]);
+	shortPrintAlignment(word1, word2, glob1[1]);
 #-----high level function calls-------------
 
 print(sys.argv, len(sys.argv));
