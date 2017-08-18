@@ -157,47 +157,156 @@ void shortPrintAlignment(std::string v,std::string w, std::vector<std::vector<in
 	std::cout << std::endl << std::endl;
 }
 
-
-std::vector<std::vector<int> > bRecBacktrace(std::vector<std::vector<int> > s, std::string v, std::string w, std::vector<std::vector<char> > b, int x, int y, std::vector<std::vector<int> > CPath={})
+std::vector<std::vector<int> > bRecBacktrace(std::vector<std::vector<int> > s, std::string v, std::string w, std::vector<std::vector<char> > bs, std::vector<std::vector<char> > bu, std::vector<std::vector<char> > bl, int x, int y, char mode, std::vector<std::vector<int> > CPath={})
 {
 	std::string V = ' ' + v;
 	std::string W = ' ' + w;
-	std::vector<std::vector<int> > pathList = CPath; //we will append the current position to this
+	//we will append the current position to this
+	std::vector<std::vector<int> > pathList = CPath;
 	pathList.insert(pathList.begin(),{x,y});
-	if(x==0 && y==0)
+	if(mode=='s')
 	{
-		return pathList;
-	}
-	else if(x==0)
-	{	
-		if(b[y][x] == '|')		//did we come from above?
-		{pathList = bRecBacktrace(s, v, w, b, x, y-1, pathList);}
+		if(x==0 && y==0)
+		{return pathList;
+		}
+		else if(x==0)
+		{
+			//did we come from above?
+			if(bs[y][x] == '|')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, 'u', pathList);}
+			else
+			{std::cout << "error: cannot traceback above" << std::endl;}
+			//did we come diagonally?
+			if(bs[y][x] == '\\')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, 's', pathList);}
+		}
+		else if(y==0)
+		{
+			//did we come from the left?
+			if(bs[y][x] == '-')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, 'l', pathList);}
+			else
+			{std::cout << "error: cannot traceback left" << std::endl;}
+			//did we come diagonally?
+			if(bs[y][x] == '\\')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, 's', pathList);}
+		}
+		else if(y<1 || x<1)
+		{std::cout << "error: unidentified traceback error" << std::endl;}
 		else
-			std::cout << "error: cannot traceback above" << std::endl;
-		if(b[y][x] == '\\')	//did we come diagonally?
-		{pathList = bRecBacktrace(s, v, w, b, x-1, y-1, pathList);}
+		{
+			//did we come from above?
+			if(bs[y][x] == '|')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, 'u', pathList);}
+			//did we come from the left?
+			if(bs[y][x] == '-')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, 'l', pathList);}
+			//did we come diagonally?
+			if(bs[y][x] == '\\')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, 's', pathList);}
+			if(bs[y][x] == ' ')
+			{std::cout << "error: blank cell in traceback(s);" << x << " " << y << std::endl;}
+		}
 	}
-	else if(y==0)
+	else if(mode=='l')
 	{
-		if(b[y][x] == '-')		//did we come from the left?
-		{pathList = bRecBacktrace(s, v, w, b, x-1, y, pathList);}
+		if(x==0 && y==0)
+		{return pathList;}
+		else if(x==0)
+		{
+			//did we come from above?
+			if(bl[y][x] == '|')
+			{
+				std::cout << "error: this shouldn't happen" << std::endl;
+				pathList = bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, 'u', pathList);
+			}
+			else
+			{std::cout << "error: cannot traceback above" << std::endl;}
+			//did we come diagonally?
+			if(bl[y][x] == '\\')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, 's', pathList);}
+		}
+		else if(y==0)
+		{
+			//did we come from the left?
+			if(bl[y][x] == '-')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, 'l', pathList);}
+			else
+			{std::cout << "error: cannot traceback left" << std::endl;}
+			//did we come diagonally?
+			if(bl[y][x] == '\\')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, 's', pathList);}
+		}
+		else if(y<1 || x<1)
+		{std::cout << "error: unidentified traceback error" << std::endl;}
 		else
-			std::cout << "error: cannot traceback left" << std::endl;
-		if(b[y][x] == '\\')	    //did we come diagonally?
-		{pathList =  bRecBacktrace(s, v, w, b, x-1, y-1, pathList);}
+		{
+			//did we come from above?
+			if(bl[y][x] == '|')
+			{
+				std::cout << "error: this shouldn't happen" << std::endl;
+				pathList = bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, 'u', pathList);
+			}
+			//did we come from the left?
+			if(bl[y][x] == '-')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, 'l', pathList);}
+			//did we come diagonally?
+			if(bl[y][x] == '\\')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, 's', pathList);}
+			if(bl[y][x] == ' ')
+			{std::cout << "error: blank cell in traceback(l);" << x << " " << y << std::endl;}
+		}
 	}
-	else if(y<1 || x<1)
+	else if(mode=='u')
 	{
-		std::cout << "error: unidentified traceback error" << std::endl;
-	}
-	else
-	{
-		if(b[y][x] == '|')		//did we come from above?
-		{pathList = bRecBacktrace(s, v, w, b, x, y-1, pathList);}
-		if(b[y][x] == '-')	    //did we come from the left?
-		{pathList = bRecBacktrace(s, v, w, b, x-1, y, pathList);}		
-		if(b[y][x] == '\\')	    //did we come diagonally?
-		{pathList = bRecBacktrace(s, v, w, b, x-1, y-1, pathList);}
+		if(x==0 && y==0)
+		{
+			return pathList;
+		}
+		else if(x==0)
+		{
+			//did we come from above?
+			if(bu[y][x] == '|')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, 'u', pathList);}
+			else
+			{std::cout << "error: cannot traceback above" << std::endl;}
+			//did we come diagonally?
+			if(bu[y][x] == '\\')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, 's', pathList);}
+		}
+		else if(y==0)
+		{
+			//did we come from the left?
+			if(bu[y][x] == '-')
+			{
+				std::cout << "error: this shouldn't happen" << std::endl;
+				pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, 'l', pathList);
+			}
+			else
+			{std::cout << "error: cannot traceback left" << std::endl;}
+			//did we come diagonally?
+			if(bu[y][x] == '\\')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, 's', pathList);}
+		}
+		else if(y<1 || x<1)
+		{std::cout << "error: unidentified traceback error" << std::endl;}
+		else
+		{
+			//did we come from above?
+			if(bu[y][x] == '|')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x, y-1, 'u', pathList);}
+			//did we come from the left?
+			if(bu[y][x] == '-')
+			{	
+				std::cout << "error: this shouldn't happen" << std::endl;
+				pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y, 'l', pathList);
+			}
+			//did we come diagonally?
+			if(bu[y][x] == '\\')
+			{pathList = bRecBacktrace(s, v, w, bs, bu, bl, x-1, y-1, 's', pathList);}
+			if(bu[y][x] == ' ')
+			{std::cout << "error: blank cell in traceback(u);" << x << " " << y << std::endl;}
+		}
 	}
 	return pathList;
 }
@@ -238,70 +347,148 @@ std::vector<std::vector<int> > twoVector(int n, int m)
 
 std::vector<std::vector<int> > localAlignment(std::string y, std::string x)
 {
-
 	const std::string V = " " + y;
 	const std::string W = " " + x;
 	std::vector<std::vector<int> > S(V.length(), std::vector<int>(W.length(), 0));
 	std::vector<std::vector<int> > L(V.length(), std::vector<int>(W.length(), 0));
 	std::vector<std::vector<int> > U(V.length(), std::vector<int>(W.length(), 0));
-	std::vector<std::vector<char> > B(V.length(), std::vector<char>(W.length(), ' '));
-	if(y=="" || x=="")
-	{
-		std::cout << "Error: empty string given" << std::endl;
-		return S;
-	}
+	std::vector<std::vector<char> > Bs(V.length(), std::vector<char>(W.length(), ' '));
+	std::vector<std::vector<char> > Bl(V.length(), std::vector<char>(W.length(), ' '));
+	std::vector<std::vector<char> > Bu(V.length(), std::vector<char>(W.length(), ' '));
+	
 	const int a = 1;
 	const int p = 11;
-	for (size_t i=0; i< V.length(); i++) //horizontal
+	
+	
+	//horizontal
+	for (size_t i=0; i< V.length(); i++)
 	{
-		for (size_t j=0; j< W.length(); j++) //vertical
+		//S[y,x];
+		//vertical
+		for (size_t j=0; j< W.length(); j++)
 		{
 			if(i==0 && j==0)
 			{
-				L[i][j] = 0;
-				U[i][j] = 0;
-				S[i][j] = 0;
-				B[i][j] = ' ';
+				L[i][j]=0;
+				U[i][j]=0;
+				S[i][j]=0;
+				Bl[i][j]=' ';
+				Bu[i][j]=' ';
+				Bs[i][j]=' ';
 			}
-			else if(j==0) //cannot use [i-1][j]
+			else if(i==0 || j==0)
 			{
-				L[i][j] = 0;
-				U[i][j] = maximum((U[i-1][j] - a), (S[i-1][j]-(p+a)));
-				S[i][j] = U[i][j];
-				B[i][j] = '|';
+				if(j==0)
+				{
+					L[i][j]=0;
+					Bl[i][j]=' ';
+					if(i==1)
+					{U[i][j] = (S[i-1][j]-(p+a));}
+					else
+					{U[i][j] = maximum((U[i-1][j] - a), (S[i-1][j]-(p+a)));}
+					Bu[i][j] = '|';
+					S[i][j]=U[i][j];
+					Bs[i][j] = '|';
+				}
+				else if(i==0)
+				{
+					U[i][j]=0;
+					Bu[i][j]=' ';
+					if(j==1)
+					{L[i][j] = (S[i][j-1]-(p+a));}
+					else
+					{L[i][j] = maximum((L[i][j-1] - a), (S[i][j-1]-(p+a)));}
+					Bl[i][j]='-';
+					S[i][j]=L[i][j];
+					Bs[i][j] = '-';
+				}
 			}
-			else if(i==0) //cannot use [i][j-1]
+			else 
 			{
-				L[i][j] = maximum((L[i][j-1] - a), (S[i][j-1]-(p+a)));
-				U[i][j] = 0;
-				S[i][j] = L[i][j];
-				B[i][j] = '-';
-			}
-			else
-			{	
-				//lower level. horizontal edges		gaps in w
-				L[i][j] = maximum((L[i][j-1] - a), (S[i][j-1]-(p+a)));
-				//upper level. vertical edges		gaps in v
-				U[i][j] = maximum((U[i-1][j] - a), (S[i-1][j]-(p+a)));
-				//main level. diagonal edges			matches/mismatches
+				//finding L
+				if(Bl[i][j-1]==' ')
+				{
+					L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bl[i][j] ='\\';
+				}
+				else if(Bl[i][j-1]=='\\')
+				{
+					L[i][j] = (S[i][j-1]-(p+a));
+					Bl[i][j] = '-';
+				}
+				else if(Bl[i][j-1]=='-')
+				{
+					L[i][j] = maximum((L[i][j-1] - a), (S[i][j-1]-(p+a)));
+					Bl[i][j] = '-';
+				}
+				else
+				{std::cout << "Error: no direction for l found" << std::endl;}
+				//check if diagonal is good enough to change our minds;
+				if(((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))-L[i][j])>=12)
+				{
+					L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bl[i][j] = '\\';
+				}
+				//finding U
+				if(Bu[i-1][j]==' ')
+				{
+					U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bu[i][j] = '\\';
+				}
+				else if(Bu[i-1][j]=='\\')
+				{
+					U[i][j] = (S[i-1][j]-(p+a));
+					Bu[i][j] = '|';
+				}
+				else if(Bu[i-1][j]=='|')
+				{
+					U[i][j] = maximum((U[i-1][j] - a), (S[i-1][j]-(p+a)));
+					Bu[i][j] = '|';
+				}
+				else
+				{std::cout << "Error: no direction for u found" << std::endl;}
+				//check if diagonal is good enough to change our minds;
+				if(((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))-U[i][j])>=12)
+				{
+					U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bu[i][j] = '\\';
+				}
+				if((i==(V.length()-1) && j!=(W.length()-1)) or (i!=(V.length()-1) && j==(W.length()-1)))
+				{
+					if(i==(V.length()-1))
+					{
+						U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+						Bu[i][j] = '\\';
+					}
+					else if(j==(W.length()-1))
+					{
+						L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+						Bl[i][j] ='\\';
+					}
+					else
+					{std::cout << "Error: no direction for endzone found" << std::endl;}
+				}
 				S[i][j] = maximum((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
 				if(S[i][j] == L[i][j])
-				{B[i][j] = '-';}
+				{Bs[i][j] = '-';}
 				if(S[i][j] == U[i][j])
-				{B[i][j] = '|';}
+				{Bs[i][j] = '|';}
 				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])))
-				{B[i][j] = '\\';}
+				{Bs[i][j] = '\\';}
 			}
 		}
 	}
-	std::vector<std::vector<int> > ourPaths = bRecBacktrace(S, y, x, B, x.length(), y.length());
+	std::vector<std::vector<int> > ourPaths = bRecBacktrace(S, y, x, Bs, Bu, Bl, x.length(), y.length(), 's');
+	
 	if(ourPaths.size() > 0)
 	{ourPaths.erase(ourPaths.begin());}
-	//std::cout << "pathsize: " << ourPaths.size() << std::endl;
+	std::cout << "pathsize: " << ourPaths.size() << std::endl;
 	//print_vi_vector(ourPaths);
+	
+	
 	shortPrintAlignment(y, x, ourPaths);
 	
-	return S;
+	return (S);
 }
 
 std::vector<std::vector<int> > globalAlignment(std::string word1, std::string word2)
@@ -311,111 +498,150 @@ std::vector<std::vector<int> > globalAlignment(std::string word1, std::string wo
 	std::vector<std::vector<int> > S(V.length(), std::vector<int>(W.length(), 0));
 	std::vector<std::vector<int> > L(V.length(), std::vector<int>(W.length(), 0));
 	std::vector<std::vector<int> > U(V.length(), std::vector<int>(W.length(), 0));
-	std::vector<std::vector<int> > F(V.length(), std::vector<int>(W.length(), 0));
-	std::vector<std::vector<char> > B(V.length(), std::vector<char>(W.length(), ' '));
-	if(word1=="" || word2=="")
-	{
-		std::cout << "Error: empty string given" << std::endl;
-		return S;
-	}
+	std::vector<std::vector<char> > Bl(V.length(), std::vector<char>(W.length(), ' '));
+	std::vector<std::vector<char> > Bu(V.length(), std::vector<char>(W.length(), ' '));
+	std::vector<std::vector<char> > Bs(V.length(), std::vector<char>(W.length(), ' '));
+	
+	
 	const int a = 1;
 	const int p = 11;
 	//k is constant. we'll make it 3 for no particular reason.
-	unsigned int k = 3;
+	unsigned int k = 20;
 	if(word2.length() > word1.length())
-	{
-		k = k + (word2.length() - word1.length());
-	}
+	{k = k + (word2.length() - word1.length());}
 	else if(word2.length() < word1.length())
-	{
-		k = k + (word1.length() - word2.length());
-	}
+	{k = k + (word1.length() - word2.length());}
 	unsigned const int N = word1.length();
 	unsigned const int M = word2.length();
-	//d is another constant chosen arbitrarily
-	const int d = 2;
+	//for point [0][0]
 	L[0][0] = 0;
 	U[0][0] = 0;
 	S[0][0] = 0;
-	B[0][0] = ' ';
-	F[0][0] = 0;
+	Bl[0][0] = ' ';
+	Bu[0][0] = ' ';
+	Bs[0][0] = ' ';
 	for (size_t i=1; i< k+1; i++)
 	{
-		L[i][0] = 0;
-		
-		U[i][0] = maximum((U[i-1][0] - a), (S[i-1][0]-(p+a)));
-		
-		S[i][0] = U[i][0];
-		
-		B[i][0] = '|';
-		
-		F[i][0] = 0; //I have no idea what number these should be initialized to
-		
+		L[i][0]=0;
+		Bl[i][0]=' ';
+		if(i==1)
+		{U[i][0] = (S[i-1][0]-(p+a));}
+		else
+		{U[i][0] = maximum((U[i-1][0] - a), (S[i-1][0]-(p+a)));}
+		Bu[i][0] = '|';
+		S[i][0]=U[i][0];
+		Bs[i][0] = '|';
 	}
 	for (size_t j=1; j< k+1; j++)
 	{
-		
-		L[0][j] = maximum((L[0][j-1] - a), (S[0][j-1]-(p+a)));
-		U[0][j] = 0;
-		S[0][j] = L[0][j];
-		B[0][j] = '-';
-		F[0][j] = 0; //I have no idea what number these should be initialized to
+		U[0][j]=0;
+		Bu[0][j]=' ';
+		if(j==1)
+		{L[0][j] = (S[0][j-1]-(p+a));}
+		else
+		{L[0][j] = maximum((L[0][j-1] - a), (S[0][j-1]-(p+a)));}
+		Bl[0][j]='-';
+		S[0][j]=L[0][j];
+		Bs[0][j] = '-';
 	}
 	for (size_t i=1; i< N+1; i++)
 	{
-		
 		for (size_t j=maximum(1,i-k); j< minimum(M,i+k)+1; j++)
 		{
+			//...
 			if((j-i)==k) //cannot use [i-1][j]
 			{
-				L[i][j] = maximum((L[i][j-1] - a), (S[i][j-1]-(p+a)));	
-				U[i][j] = 0;
-				S[i][j] = maximum((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), L[i][j]);
-				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])))
-				{B[i][j] = ('\\');}
-				else if(S[i][j] == L[i][j])
-				{B[i][j] = '-';}
-				else
-				{std::cout << "error: cannot determine backtracing direction1" << std::endl;}
+				U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+				Bu[i][j] = '\\';
 			}
-			else if((i-j)==k) //cannot use [i][j-1]
-			{
-				L[i][j] = 0;
-				U[i][j] = maximum((U[i-1][j] - a), (S[i-1][j]-(p+a)));
-				S[i][j] = maximum((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j]);
-				if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])))
-					B[i][j] = ('\\');
-				else if(S[i][j] == U[i][j])
-				{B[i][j] = '|';}
-				else
-				{std::cout << "error: cannot determine backtracing direction2" << std::endl;}
-			}	
-			else //we're assuming this is inside the band
-			{
-				L[i][j] = maximum((L[i][j-1] - a), (S[i][j-1]-(p+a)));
-				U[i][j] = maximum((U[i-1][j] - a), (S[i-1][j]-(p+a)));
-				S[i][j] = maximum((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
-				if(S[i][j] == L[i][j])
-				{B[i][j] = '-';}
-				else if(S[i][j] == U[i][j])
-				{B[i][j] = '|';}
-				else if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])))
-				{B[i][j] = '\\';}
-				else
-				{std::cout << "error: cannot determine backtracing direction3  " << i << ", " << j << ", " << S[i][j] << ", " << L[i][j] << ", " << U[i][j] << ", "<< std::endl;}
-			}	 
-			if((i-j)>k)
-			{F[i][j] = maximum((F[i][j-1]-d),(F[i-1][j-1] + S[i][j]));}
-			else if((j-i)>k)
-			{F[i][j] = maximum((F[i-1][j]-d),(F[i-1][j-1] + S[i][j]));}
 			else
-			{F[i][j] = (F[i-1][j-1] + S[i][j]);}
-			
+			{
+				//finding U
+				if(Bu[i-1][j]==' ')
+				{
+					U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bu[i][j] = '\\';
+				}
+				else if(Bu[i-1][j]=='\\')
+				{
+					U[i][j] = (S[i-1][j]-(p+a));
+					Bu[i][j] = '|';
+				}
+				else if(Bu[i-1][j]=='|')
+				{
+					U[i][j] = maximum((U[i-1][j] - a), (S[i-1][j]-(p+a)));
+					Bu[i][j] = '|';
+				}
+				else
+				{std::cout << "Error: no direction for u found" << std::endl;}
+				//check if diagonal is good enough to change our minds;
+				if(((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))-U[i][j])>=12)
+				{	
+					U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bu[i][j] = '\\';
+				}
+			}
+			//...
+			if((i-j)==k) //cannot use [i][j-1]
+			{
+				L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+				Bl[i][j] ='\\';
+			}
+			else
+			{
+				//finding L
+				if(Bl[i][j-1]==' ')
+				{
+					L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bl[i][j] ='\\';
+				}
+				else if(Bl[i][j-1]=='\\')
+				{
+					L[i][j] = (S[i][j-1]-(p+a));
+					Bl[i][j] = '-';
+				}
+				else if(Bl[i][j-1]=='-')
+				{
+					L[i][j] = maximum((L[i][j-1] - a), (S[i][j-1]-(p+a)));
+					Bl[i][j] = '-';
+				}
+				else
+				{std::cout << "Error: no direction for l found" << std::endl;}
+				//check if diagonal is good enough to change our minds;
+				if(((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]))-L[i][j])>=12)
+				{
+					L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bl[i][j] = '\\';
+				}
+			}
+			//are we on the edge of the grids?
+			if((i==(V.length()-1) and j!=(W.length()-1)) or (i!=(V.length()-1) and j==(W.length()-1)))
+			{
+				if(i==(V.length()-1))
+				{
+					U[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bu[i][j] = '\\';
+				}
+				else if(j==(W.length()-1))
+				{
+					L[i][j] = (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j]));
+					Bl[i][j] ='\\';
+				}
+				else
+				{	
+					std::cout << "Error: no direction for endzone found" << std::endl;
+				}
+			}
+			S[i][j] = maximum((S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])), U[i][j], L[i][j]);
+			if(S[i][j] == L[i][j])
+			{Bs[i][j] = '-';}
+			if(S[i][j] == U[i][j])
+			{Bs[i][j] = '|';}
+			if(S[i][j] == (S[i-1][j-1] + DeltaBLOSUM(V[i], W[j])))
+			{Bs[i][j] = '\\';}
 		}
-		
 	}
-	
-	std::vector<std::vector<int> > ourPaths = bRecBacktrace(S, word1, word2, B, word2.length(), word1.length());
+	std::vector<std::vector<int> > ourPaths = bRecBacktrace(S, word1, word2, Bs, Bu, Bl,word2.length(),word1.length(), 's');
 	if(ourPaths.size() > 0)
 	{ourPaths.erase(ourPaths.begin());}
 	//std::cout << "pathsize: " << ourPaths.size() << std::endl;

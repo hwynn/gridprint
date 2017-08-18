@@ -277,7 +277,7 @@ def globalAlignment(word1, word2):
 	a = 1;
 	p = 11;
 	#k is constant. we'll make it 3 for no particular reason.
-	k = 3;
+	k = 20;
 	if(len(word2) > len(word1)):
 		k = k + (len(word2) - len(word1));
 	elif(len(word2) < len(word1)):
